@@ -42,6 +42,9 @@
     .navbar{
         background-color: #13334e;
     }
+    .certBtn{
+      color: red;
+    }
     /* You may also want to reduce the gap in the mobile view */
 @media (max-width: 768px) {
     .footer-content {
@@ -72,23 +75,24 @@
         <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
             <ul class="navbar-nav d-flex align-items-center">
                 {% if current_user.is_authenticated %}
-                <li class="nav-item">
-                    <a class="btn btn-sm btn-light me-2" href="{{ url_for('dashboard') }}" class="btn btn-sm btn-primary">Dashboard</a>
-                     <a class="btn btn-sm btn-light me-2" href="{{ url_for('manage_drugs') }}" class="btn btn-sm btn-primary">Manage drugs</a>
+                <li class="nav-item dropdown">
+                    <a class="btn btn-sm btn-light me-2 p-1" href="{{ url_for('dashboard') }}"
+                     class="btn btn-sm btn-primary p-1">Dashboard</a>
+                     <a class="btn btn-sm btn-light me-2 p-1" href="{{ url_for('manage_drugs') }}" 
+                     class="btn btn-sm btn-primary p-1">Manage drugs</a>
                 </li>
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle btn btn-sm me-2 p-1 bg-light btn-light text-black" href="#" id="certificateDropdown" role="button" aria-expanded="false">Certificates</a>
-                    <ul class="dropdown-menu" aria-labelledby="certificateDropdown">
-                        <li><a class="dropdown-item" href="{{ url_for('medical_certificate') }}">Medical Certificate</a></li>
-                        <li><a class="dropdown-item" href="{{ url_for('fitness_certificate') }}">Fitness Certificate</a></li>
-                        <li><a class="dropdown-item" href="{{ url_for('custom_certificate') }}">Custom Certificate</a></li>
-                        <li><a class="dropdown-item" href="{{ url_for('certificate') }}">Death Certificate</a></li>
-                        <li><a class="dropdown-item" href="{{ url_for('receipt') }}">receipt</a></li>
-                       
-                    </ul>
-                </li>
+  <a class=" certBtn btn btn-primary btn-light me-3 p-1 dropdown-toggle" href="#" role="button" id="certificatesDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+    Certificates
+  </a>
+  <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+    <li><a class="dropdown-item" href="{{ url_for('death_certificate') }}">Death Certificate</a></li>
+    <li><a class="dropdown-item" href="{{ url_for('medical_certificate') }}">Medical Certificate</a></li>
+    <li><a class="dropdown-item" href="{{ url_for('receipt') }}">Payment Receipt</a></li>
+  </ul>
+</li>
                 <li class="nav-item">
-                    <a class="btn btn-sm btn-danger me-2" href="{{ url_for('logout') }}">Logout</a>
+                    <a class="btn btn-sm btn-danger me-2 p-1" href="{{ url_for('logout') }}">Logout</a>
                 </li>
                 {% else %}
                 <li class="nav-item">

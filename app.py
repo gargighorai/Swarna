@@ -408,9 +408,9 @@ from datetime import datetime
 
 #--------Certificate and Receipt Routes ------------
 from datetime import datetime
-@app.route('/certificate/',methods=['GET', 'POST'])
+@app.route('/death_certificate/',methods=['GET', 'POST'])
 @login_required
-def certificate():
+def death_certificate():
     return render_template('death_certificate.html',
             now=datetime.now())
 @app.route("/certificate/medical")
@@ -468,8 +468,6 @@ def give_advice(patient_id):
 def get_drugs():
     # Query the database to get all drug entries
     all_drugs = Drug.query.all()
-    
-    # Convert the list of SQLAlchemy objects to a list of dictionaries
     # This makes them easily convertible to JSON.
     drugs_list = [
         {"name": drug.name}
