@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% block title %}Give Advice{% endblock %}
+{% block content %}
+<style>
+ .availDrug ,.presDrug{
+  font-size: 12px;
+  width: 310px;
+ }
+ .availDrug{
+  color: rgb(16, 21, 87);
+ }
+ #avaiablList{
+  color: red;
+ }
+ .presDrug{
+  color: rgb(25, 197, 111);
+ }
+ .btn{
+  width: 200px;
+ }
+</style>
+    <div class="container-fluid mt-1">
+        <h6>Give Advice for {{ patient.name }}</h6>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            <ul class=flashes>
+            {% for category, message in messages %}
+              <li class="{{ category }}">{{ message }}</li>
+            {% endfor %}
+            </ul>
+          {% endif %}
+        {% endwith %}
+        <form action="{{ url_for('give_advice', patient_id=patient.id) }}" method="POST">           
+            <div class="d-flex">
+                
+                <div class="col-md-6">
+                    <small><h6 class="heading bg-success text-white p-1">Prescribed Drugs</h6></small>
+                    <ul id="prescribedList" class="presDrug list-group" style="cursor:pointer;" onclick="removrDrug(this)">
+                        <li class="list-group-item drug-item" style="cursor:pointer;" onclick="addDrug(this)">
+                          {{ drug.name }}
+                        </li>
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <small><h6 class="bg-primary text-white p-1">Available Drugs</h6></small>
+                    <ul id="availableList" class="availDrug list-group">
+                      {% for drug in available_drugs %}
+                        <li class="list-group-item drug-item" style="cursor:pointer;" onclick="addDrug(this)">
+                          {{ drug.name }}
+                        </li>
+                      {% endfor %}
+                    </ul>
+                </div>
+            </div>
+            <input type="hidden" name="prescribed_drugs" id="prescribedDrugsInput">
+            <br><br>
+            <button type="submit" class="btn btn-sm bg-primary text-white">Save Advice</button>
+        </form>
+    </div>
+    <script>
+        function addDrug(element) {
+            // Get the name of the drug from the clicked list item
+            const drugName = element.innerText.trim();    
+            // Get the prescribed drugs input field and list
+            const prescribedInput = document.getElementById('prescribedDrugsInput');
+            const prescribedList = document.getElementById('prescribedList');  
+            // Update the hidden input field with the new drug name
+            if (prescribedInput.value) {
+                // Append a comma if there's already a drug
+                prescribedInput.value += `, ${drugName}`;
+            } else {
+                // Otherwise, just add the first drug name
+                prescribedInput.value = drugName;
+            }    
+            // Create a new list item for the prescribed column
+            const newListItem = document.createElement('li');
+            newListItem.className = 'list-group-item prescribed-item';
+            newListItem.innerText = drugName;          
+            // Append the new list item to the prescribed list
+            prescribedList.appendChild(newListItem);
+          }
+// ----------------------Remove Drug Logic ---------------------------
+  function RemoveDrug(element){
+           
+             prescribedList.addEventListener('click', (event) => {
+                const li = event.target.closest('li');
+                if (li && selectedDrugIds.has(li.dataset.drugId)) {
+                    const drugIdToRemove = li.dataset.drugId;
+                    li.remove();
+                    selectedDrugIds.delete(drugIdToRemove);
+                    updateHiddenInput();
+                    const originalLi = document.querySelector(`.available-drug[data-drug-id="${drugIdToRemove}"]`);
+                    if (originalLi) {
+                        originalLi.removeAttribute('data-selected');
+                    }
+                }
+            });
+       
+          }
+    </script>
+{% endblock %}

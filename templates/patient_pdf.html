@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    body { font-family: Arial, sans-serif; font-size: 12px; }
+    h2 { text-align: center; margin-bottom: 20px; }
+    ul { padding-left: 20px; }
+    .signature-block { display: flex; justify-content: space-between; margin-top: 40px; }
+    .signature-block img { height: 80px; }
+    .header { border: 1px solid #ccc; padding: 10px; margin-bottom: 15px; }
+    .header-row { display: flex; justify-content: space-between; align-items: center; font-size: 14px; }
+  </style>
+</head>
+<body>
+
+  <h2>Prescription for {{ patient.name }}</h2>
+
+  <div class="header">
+    <div class="header-row">
+      <div>
+        <strong>Patient:</strong> {{ patient.name }} &nbsp;&nbsp;
+        <strong>Age:</strong> {{ patient.age }} yrs
+      </div>
+      <div>
+        <strong style="color: green;">Date:</strong>
+        <span style="color: green;">{{ current_date }}</span>
+      </div>
+    </div>
+  </div>
+
+  <p><strong>Advice:</strong> {{ patient.advice }}</p>
+  
+  <p><strong>Prescribed Drugs:</strong></p>
+  <ul>
+    {% for drug in patient.drugs %}
+      <li>{{ drug.name }}</li>
+    {% endfor %}
+  </ul>
+
+  <div class="signature-block">
+    <div>
+      <img src="data:image/png;base64,{{ qr_code }}" alt="QR Code">
+    </div>
+    <div style="text-align: right;">
+      <p>_____________________</p>
+      <p>{{ doctor.name }}</p>
+      <p><em>Signature</em></p>
+    </div>
+  </div>
+
+  <hr>
+  <p style="text-align: center;"><em>This prescription was digitally generated on {{ current_date }}</em></p>
+
+</body>
+</html>

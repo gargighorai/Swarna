@@ -1,0 +1,40 @@
+[
+    {
+        "id": 5,        
+        "name": "Cap Augmentin duo(1.2g) - 1 tab twice daily x 10 d"
+        
+    },
+    {
+        "id": 6,       
+        "name": "Cap Autrin - 1 cap once daily x 3 mns"
+        
+    },
+    {
+        "id": 7,       
+        "name": "Inj. Mikacin 250 mg im/iv twice daily x 7 days"
+        
+    },
+    {
+        "id": 8,   
+        "name": "Tab Metrogyl ER -600mg -1 tab twice daily x 7 d"
+        
+    },
+    {
+        "id": 9,
+        "name": "Tab Cetrizine -10mg -1 tab twice daily x 3 d"
+    
+    },
+    {
+        "id": 10,
+        "name": "Tab Ibuprofen 600 mg -1 tab sos"
+        
+    },
+    {
+    "id":11,
+        "name": "Tab Macfolate 500 mg -1 tab sos"   
+    },
+    {
+    "id":11,
+        "name": "Tab Macfolate 500 mg -1 tab sos"   
+    }
+]

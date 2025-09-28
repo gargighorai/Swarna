@@ -1,0 +1,194 @@
+{% extends "base.html" %}
+{% block title %}Manage Drugs{% endblock %}
+{% block content %}
+<style>
+  .btn-outline-secondary:hover {
+    background-color: #4f7899;
+    color: red;
+  }
+  .btn{
+    font-size: 12px;
+    padding: 0;
+  }
+  .table ,.table th {
+    font-size: 20px;
+  }
+  a{
+    text-decoration: none;
+  }
+  .backBtn{
+    font-size: 12px;
+    padding: 5px;
+    margin: 2px;
+    line-height: 1;
+    color: white;
+    background-color: #255d8b;
+    border-radius: 0.2rem;
+  }
+  th{
+    text-align: center;
+    font-size: 9px;
+    padding: 0;
+    margin: 0;
+    line-height: 1;
+    vertical-align: top;
+  }
+  td{ 
+    font-size: 12px;
+    vertical-align: top;
+    padding : 0;
+    margin: 0;
+    line-height: 0.5;
+   }
+   .action-columns {
+    text-align: center;
+    width: 100px;
+   }
+   .no-space-button {
+    margin: 0;
+    padding: 0;
+    line-height: 1;
+    border-radius: 0.2rem;
+   } 
+   #drugInput {
+    font-size: 12px;
+    color: #13334e;
+    width: 400px;
+    text-wrap: wrap;
+   }
+   .exportBtn, .importBtn{
+    font-size: 12px;
+    width: 100px;
+    padding: 6px;
+    margin: 2px;
+    line-height: 1;
+    color: white;
+    border: none;
+    border-radius: 0.2rem;
+   }
+   .staticBtn{
+    font-size: 12px;
+    width: 150px;
+    padding: 6px;
+    margin: 2px;
+    line-height: 1;
+    color: white;
+    background-color: #13334e;
+    border: none;
+    border-radius: 0.3rem;
+   }
+   .servDrug{
+    font-size: 12px;
+    width: 120px;
+    padding: 8px;
+    margin: 3px;
+    line-height: 1;
+    color: white;
+    background-color: #13334e;
+    border-radius: 0.3rem;
+   }
+   .addDrug{
+    font-size: 12px;
+    width: 70px;
+    padding: 6px;
+    margin: 4px;
+    line-height: 1;
+    color: white;
+    background-color: #13334e;
+    border-radius: 0.3rem;
+}   
+  </style>
+
+<div class="container-fluid mt-0 mb-0">
+  <div class="d-flex justify-content-between align-items-center mb-0">
+    <h6 class="mb-2 mt-0">Drug management  Page</h3>
+    <a href="{{ url_for('dashboard') }}" class=" backBtn btn btn-outline-secondary mb-2">
+      <i class="bi bi-arrow-left-circle me-1"></i> Back to Dashboard
+    </a>  
+  </div>
+  <form method="POST" action="{{ url_for('add_drugs') }}" class="row g-3 mb-2">
+    
+      <div class="d-flex justify-content-end align-items-center ms-auto gap-2">
+        <input type="text" name="name" id="drugInput"
+                 class="form-control" placeholder="Add drugs name" required>
+       <button type="submit" class="addDrug"> Add Drug</button>
+      <a href="{{ url_for('import_static_drugs') }}" class="servDrug">
+  Import from server 
+</a>
+
+      </div>
+  </form>
+
+  {% if drugs %}
+  <table class="table table-primary  table-striped">
+  <thead style="background-color: #b87b20ff;">
+    <tr style="background-color: #b87b20ff;">
+      <th style="background-color: #e1cfb4ff; text-align:center; font-size:12px;">Drugs available</th>
+      <th style="background-color: #1f7b15ff;  text-align:center;font-size:12px; color:white" class="action-columns" width="120px">Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for drug in drugs %}
+    <tr>
+      <!-- <td>{{ loop.index }}</td> -->
+      <td  style=" border-left: 1px solid #cc9e39ff;">{{ drug.name }}</td>
+      <td style="text-align:center; border-left: 1px solid #cc9e39ff;">
+        <!-- Edit button triggers modal -->
+        <button class="btn btn-sm btn-warning no-space-button" data-bs-toggle="modal" data-bs-target="#editModal{{ drug.id }}">Edit</button>
+
+        <!-- Delete button -->
+        <a href="{{ url_for('delete_drug', drug_id=drug.id) }}" class="btn btn-sm btn-danger no-space-button">Delete</a>
+
+        <!-- Edit Modal -->
+        <div class="modal fade" id="editModal{{ drug.id }}" tabindex="-1">
+          <div class="modal-dialog">
+            <form method="POST" action="{{ url_for('edit_drug', drug_id=drug.id) }}">
+              <div class="modal-content bg-white text-primary">
+                <div class="modal-header">
+                  <h5 class="modal-title">Edit Drug</h5>
+                  <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                  <input type="text" name="name" class="form-control" value="{{ drug.name }}" required>
+                </div>
+                <div class="modal-footer">
+                  <button type="submit" class="btn btn-primary">Save Changes</button>
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                </div>
+            </form>
+          </div>
+        </div>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+  {% else %}
+    <p class="text-muted">No drugs available.</p>
+  {% endif %}
+    
+  <div class="mt-4 d-flex jistify-content-start align-items-center gap-1">
+    <a href="{{ url_for('export_drugs') }}" 
+    class=" exportBtn btn btn-outline-success bg-primary text-white btn-sm">
+      <i class="bi bi-upload bg-primary"></i> Export JSON
+    </a>
+
+    <form method="POST" action="{{ url_for('import_drugs') }}"
+     enctype="multipart/form-data" 
+     class="d-flex align-items-center gap-2">
+      <input type="file" name="file" accept=".json" 
+      required class="form-control form-control-sm"
+       style="max-width: 200px;">
+      <button type="submit" class=" importBtn btn 
+             bg-success text-white btn-sm">
+        <i class="bi bi-download"></i> Import JSON
+      </button>
+    </form>
+    <!-- <a href="{{ url_for('import_static_drugs') }}" class=" staticBtn btn btn-primary">
+      Import drugs from Server 
+       </a> -->
+  </div>
+</div>
+{% endblock %}
+

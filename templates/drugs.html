@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+  .container {
+    width: 90vw;
+    margin-top: 0px;
+  }
+  h6 {
+    margin-bottom: 10px;
+  }
+  .table {
+    margin-top: 20px;
+    color: red;
+  }
+  .trhead{
+    font-size: 12px;
+    height: 12px;
+    background-color: blue;
+  }
+  #td{
+    color: rgb(4, 11, 41);
+    font-size: 12px;
+  }
+  #entryFbtn {
+    font-size: 12px;
+    height: 24px;
+  }
+  input{
+    height: 28px;
+    background-color: red;
+  }
+  </style>
+<div class="container mt-0">
+  <h6>Manage Drugs</h6>
+
+  <!-- Add Drug Form -->
+  <form method="POST" action="{{ url_for('add_drug') }}" class="d-flex mb-2">
+    <input type="text" name="name" class="form-control me-2" placeholder="Drug name" required>
+    <input type="text" name="description" class="form-control me-2" placeholder="Description">
+    <button id="entryFbtn" type="submit" class="btn btn-success">Add</button>
+  </form>
+
+  <!-- Drug List -->
+  <table class="table table-striped bg-primary">
+    <thead>
+      <tr class="trhead">
+        <th>Drug Name</th>
+        <th style="width:120px;">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for drug in drugs %}
+      <tr>
+        <td id="td">{{ drug.name }}</td>
+        <td>
+          <!-- Edit Button (opens modal) -->
+          <button type="button" class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#editModal{{ drug.id }}">
+            Edit
+          </button>
+
+          <!-- Delete -->
+          <form method="POST" action="{{ url_for('delete_drug', drug_id=drug.id) }}" class="d-inline">
+            <button class="btn btn-sm btn-danger" onclick="return confirm('Delete {{ drug.name }}?')">Delete</button>
+          </form>
+        </td>
+      </tr>
+
+      <!-- Edit Modal -->
+      <div class="modal fade" id="editModal{{ drug.id }}" tabindex="-1">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <form method="POST" action="{{ url_for('edit_drug', drug_id=drug.id) }}">
+              <div class="modal-header">
+                <h5 class="modal-title">Edit Drug</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+              </div>
+              <div class="modal-body">
+                <input type="text" name="name" value="{{ drug.name }}" class="form-control mb-2" required>
+                <input type="text" name="description" value="{{ drug.description }}" class="form-control">
+              </div>
+              <div class="modal-footer">
+                <button type="submit" class="btn btn-primary">Save changes</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}Add New Visit{% endblock %}
+
+{% block content %}
+    <style>
+        .container-fluid{
+            width: 60%;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        label, input{
+            color: darkblue;
+            padding: 0;
+        }
+        div{
+            margin-top: 0;
+            margin-bottom: 0;
+        }
+    </style>
+    
+    <div class="container-fluid mb-0">
+        <p> Data Entry form {{ patient.name }}</p>
+        <hr>
+    <form action="{{ url_for('add_visit', patient_id=patient.id) }}" method="post">
+        <div class="form-group">
+            <label for="bp"> BP:</label>
+            <input type="text" class="form-control" id="bp" name="bp"></p>
+        </div>
+        <div class="form-group">
+            <label for="wt">Weight (Wt):</label>
+            <input type="text" class="form-control" id="wt" name="wt">
+        </div>
+        <div class="form-group">
+            <label for="chief_complaints">Chief Complaints:</label>
+            <input type="text" class="form-control" id="chiefCom" name="chiefCom">
+        </div>
+        <div class="form-group">
+            <label for="medical_history">Medical History:</label>
+            <input type="text" class="form-control" id="med_history" name="med_history" rows="3">
+        </div>
+        <div class="form-group">
+            <label for="surgical_history">Surgical History:</label>
+            <input type="text" class="form-control" id="surg_history" name="surg_history">
+        </div>
+        <div class="form-group">
+            <label for="drug_allergy">Drug Allergy:</label>
+            <input type="text" class="form-control" id="allergy" name="allergy">
+        </div>
+        <br>
+        <button type="submit" class="btn btn-primary">Save Visit</button>
+    </form>
+    </div>
+{% endblock %}

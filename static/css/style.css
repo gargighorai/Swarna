@@ -1,0 +1,49 @@
+.drug-section {
+    /* Make this div a Flexbox container */
+    display: flex;
+    /* Put space between the two columns */
+    justify-content: space-between;
+    /* Align items to the top of the container */
+    align-items: flex-start;
+    /* Add some bottom margin for spacing */
+    margin-bottom: 20px;
+}
+
+.drug-column {
+    /* Each column will take up an equal amount of space */
+    flex: 1;
+    /* Add some padding inside the column */
+    padding: 10px;
+}
+
+.drug-column h5 {
+    /* Make the heading font smaller */
+    font-size: 14px;
+    /* Reduce the space below the heading */
+    margin-bottom: 5px;
+}
+
+.drug-list {
+    /* Remove the default list bullet points */
+    list-style: none;
+    /* Remove default padding and margin from the list */
+    padding: 0;
+    margin: 0;
+}
+
+.drug-list li {
+    /* Make the list item font smaller */
+    font-size: 13px;
+    /* Reduce the space between each list item */
+    margin-bottom: 3px;
+    /* Add a pointer cursor to show it's clickable */
+    cursor: pointer;
+}
+.container {
+    /* Set a maximum width for the container */
+    max-width: 800px;
+    /* Center the container horizontally */
+    margin: 0 auto;
+    /* Add some padding on the sides for extra space */
+    padding: 0 20px;
+}

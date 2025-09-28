@@ -1,0 +1,181 @@
+{% extends "base.html" %}
+{% block title %}Death Certificate{% endblock %}
+
+{% block content %}
+<style>
+  .header{
+    background-color: bisque;
+    height: 75PX;
+    width: 90vw;
+  }
+  .other{
+    font-size: 12px;
+    color:darkblue;
+  }
+  .logo{
+    border-radius: 30px;;
+    height:60px;
+    vertical-align: middle;
+  }
+  .header-right{
+    font-size: 12px;
+    color:rgb(8, 8, 63)
+  }
+  .ptinfo{
+    display: none;
+    font-size: 14px;
+  }
+   #patient_name .input {
+    color: red;
+    font-size: 14px;
+    font-weight: bold;
+  }
+.myForm{
+  background-color: aqua;
+  width: 90vw;
+}
+.opinion{
+  display: none;
+  color: red;
+}
+#print{
+  display: none;
+  width:100px;
+}
+</style>
+  
+ <body>
+<div class=" container-fluid mt-0" id="printableArea">
+
+  <!-- Doctor Info Header -->
+  <div class="header row border-bottom">
+    <div class="row">
+    <div class=" col-md-4">
+      <h5 class="user">Dr. N K Ghorai{{ current_user.name }}</h1>
+      <p class=" other">{{ current_user.degree }}
+         <br> Reg No: {{ current_user.reg_no }}</p>
+    </div>
+    <div class="col-md-4">
+      <img class="logo" src="/static/logo.png"/>
+    </div>
+    <div class="col-md-4 text-end header-right">
+      <p class="mb-0">Email: {{ current_user.email }}</p>
+      <p class="mb-0">Web:{{ current_user.website }}</p>
+      <p class="mb-0">Mobile: +91 9434166808 {{ current_user.mobile }}</p>
+      <p class="mb-0"> {{now.strftime("%d-%m-%Y") }} </p>
+    </div>
+  </div>
+  </div>
+  <div>
+  <p><h5 class="text-center "><u>Death Certificate</u></h5></p>
+  </div>
+<!-- Patient Info -->
+ <div>
+ <div class="myForm mt-1 " id="myForm">
+   <div class="row p-1">
+    <div class="col-md-4 p-1">
+      <input type="text" id="name" placeholder="Deceased Name">
+    </div>
+  <div class="col-md-1 p-1">
+    <input type="number" id="age" placeholder="Age">
+  </div>
+  <div class="col-md-3 p-1">
+    <input type="text" id="sonof" placeholder="Father's Name">
+  </div>
+  <div class="col-md-2 p-1">
+    <input type="text" id="address" placeholder="Address">
+  </div>
+  <div class="col-md-3 p-1">
+    <input type="date" id="exp_date" placeholder="Expired on">
+  </div>
+  <div class="col-md-3 p-1">
+    <input type="text" id="exp_time" placeholder="Time of death:">
+  </div>
+  <div class="col-md-2 p-1">
+    <input type="text" id="death_cause" placeholder="Cause of death">
+  </div>
+  <div class="col-md-2 p-1">
+    <input type="text" id="Comorbid1" placeholder=" comorbidity any">
+  </div>
+  <div class="col-md-2 p-1">
+    <input type="text" id="Comorbid2" placeholder="Comorbidity any ">
+  </div>
+<div>
+<button class="btn btn-sm bg-primary text-white"
+ onclick="updateParagraph(); newParagraph();">Generate</button>
+</div>
+</div>
+</div> 
+</div>
+  <hr/>
+  <div class="row">
+    <div class=" ptinfo col-md-4 text-primary" id="ptinfo">
+      <p>peripheral pulse: Absent<br>
+      Carotid pulse: Absent<br>
+      Heart sounds: absent<br>
+      Corneal reflex:absent<br>
+      Light relex: absent<br>
+      Pupils:fixed; dilated</p>
+    </div>
+    <div class="col-md-8 p-2 text-primary">
+      <p id="outputParagraph"></p> 
+   </div>
+   <div class="opinion col-md-12" id="opinion">
+    <p><u><b>Cause of Death: </b><br> 
+       <p id="newParagraph"></p></u></b>
+   </div>
+  </div>
+  </div>
+</body>
+</div>
+  <!-- Submit Button -->
+   <div class="mt-3 d-flex justify-content-end ">    
+    <button type="submit" id="print"  class="btn btn-success">Print Me</button>
+  </div> 
+
+<script>
+function updateParagraph() {
+  let morbidity1 = document.getElementById('Comorbid1').value;
+  let morbifity2 = document.getElementById('Comorbid2').value;
+  let comString= morbidity;
+  if(comorbid2Value){
+    comString +=  " and " + comorbid2Value;
+  }
+  const nameValue = document.getElementById('name').value;
+  const ageValue = document.getElementById('age').value;
+  const sonofValue = document.getElementById('sonof').value;
+  const addressValue = document.getElementById('address').value;
+  const exp_dateValue = document.getElementById('exp_date').value;
+  const exp_timeValue = document.getElementById('exp_time').value;
+  const causeOfDeathValue = document.getElementById('death_cause').value;
+  const outputParagraph = document.getElementById('outputParagraph');
+  const newParagraph= document.getElementById('newParagrapg');
+  const myForm =document.getElementById('myForm');
+  var ptInfo = document.getElementById('ptinfo');
+  var printBtn=document.getElementById("print");
+  const comStringnNew=`${comorbid1} and ${comorbid2}`;
+  const comorbid1Value = document.getElementById('Comorbid1').value;
+  const comorbid2Value = document.getElementById('Comorbid2').value;
+  // Concatenate the input values and set them as the paragraph's text content
+  outputParagraph.textContent =` This is to certify that ${nameValue} 
+   Age: ${ageValue} yrs S/O-  ${sonofValue} R/O- ${addressValue}
+   Expired on ${exp_dateValue} at about ${exp_timeValue}
+   Cause of Death: In my opinion is ${causeOfDeathValue} with ${comStringnNew}.`
+   myForm.style.display="none" ;
+   ptInfo.style.display ="block";
+   printBtn.style.display="block"
+  }
+
+   function newParagraph() {   
+   const myDiv=document.getElementById('opinion');
+   const comorbid1Value = document.getElementById('Comorbid1').value;
+  const comorbid2Value = document.getElementById('Comorbid2').value;
+   const newParagraph = document.createElement('p');
+   newParagraph.textContent = `In my opinion is cardio-respiratory failure
+    suffering from CVA with comorbidity ${comorbid1Value} & ${comorbid2Value}. `;
+    myDiv.appendChild(newParagraph);
+    myDiv.style.display="block" ;
+
+  }
+</script>
+{% endblock %}

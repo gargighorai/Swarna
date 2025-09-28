@@ -1,0 +1,197 @@
+{% extends "base.html" %}
+{% block title %}Medical Certificate{% endblock %}
+{% block content %}
+<style>
+  .header{
+    background-color: bisque;
+    width: 90vw;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .other{
+    font-size: 12px;
+    color:darkblue;
+  }
+  .logo{
+    border-radius: 30px;;
+    height:60px;
+    vertical-align: middle;
+  }
+  .header-right{
+    font-size: 12px;
+    color:rgb(8, 8, 63);
+    margin-right: 10px;
+  }
+  input {
+    border:lightgray;
+  }
+   #patient_name .input {
+    color: red;
+    font-size: 14px;
+    font-weight: bold;
+  }
+  #myForm{
+     background-color:rgb(240, 240, 240);
+        padding:18px;
+        width:340px;
+        margin-left: auto;
+        margin-right: auto;
+  }
+  .signature{
+     display: none; 
+  }
+
+.styled-input {
+  color: blue; /* Set text color */
+  font-weight: bold; /* Make text bold */
+  display: inline-block; /* Make it inline */
+  min-width: auto; /* Allow width to fit content */
+  border: 1px solid lightgray;
+  font-size: 14px;
+}
+.certify{
+    font-size: 14px;
+    margin-left:20px;
+  }
+  .opinion{
+    margin-top:20px;
+    font-size:11px;
+    color:darkblue;
+  }
+  .user{
+    margin-left: 20px;
+    font-size:18px;
+    color:darkblue;
+  }
+  /* .form-container{
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  } */
+  #outputParagraph{
+    font-size:14px;
+    color:darkblue;
+    text-justify: inter-word;
+    width: 500px;
+    margin-left: 10vw;
+    margin-right: auto;
+  }
+  .signature{
+    text-align: left;
+    margin-top: 10px;
+    margin-left: 45px;
+    display: none;
+  }
+</style>
+
+<body>
+  <div class="header d-flex justify-content-between align-items-center p-2 mt-0">
+  
+      <div class="col-md-6 mt-0">
+        <h5 class="mb-0" style="color:darkblue;">Dr. N K Ghorai</h5>
+        <p class="other mb-0">{{current_user.degree}}</p>
+        <p class="other mb-0">Consultant Gynaecologist  & Obstetrician</p>
+        <p class="other mb-0">Regd. No.: WB/MC/44428</p>
+      </div>   
+    <div class=" text-end header-right">
+      <p class="mb-0">{{current_user.website}}</p>
+      <p class="mb-0">Mob: {{current_user.doc_mob}}</p>
+      <p class="mb-0">Email: {{current_user.email}}</p>
+      </div>
+    </div>
+  </div>
+  <p class="text-center mb-2 mt-3"><u><b>Medical Certificate</b></u></p>
+  <p class="text-center mb-1"><u>To whom it may concern</u></p>
+  <p class="certify mb-0"> This is to certify that</p>
+
+  <div id="myDiv" class="form-container justify-content-center mb-0">
+      <div class="col-md-8 mb-0">
+        <p id="outputParagraph"></p>
+      </div>
+    <div class="signature mb-0" id="signature">
+        <img src="/static/signature.png"  width="80px" /><br>
+         <p class="mb-0">{{now.strftime('%d-%m-%Y')}}<br>
+        <p style="color:darkblue">{{current_user.username}}</p>
+    </div>
+  </div> 
+  <div>
+    <p id="newParagraph"></p>
+  </div>
+  <div class="container">
+  <div class="row">
+    <div id="myForm">
+      <table class="table">
+        <tr>
+          <td>Name:</td><td><input type="text" id="name" placeholder="Patient name"></td> </tr>
+        <tr>
+          <td>Age:</td><td><input type="text" id="age" placeholder="Patient age"></td></tr>
+        <tr>
+          <td>Address:</td><td><input type="text" id="address" placeholder="address"></td> </tr>
+        <tr>
+          <td>Disease:</td><td><input type="text" id="disease" placeholder="suffering from"></td></tr>
+        <tr aria-colspan="2">
+          <td>From :</td><td><input type="date" id="from_date" placeholder="suffering from"></td></tr>
+        <tr>
+          <td>to:</td><td><input type="date" id="to_date" placeholder="Patient name"></td>        </tr>
+        </table>
+    <button class="btn btn-sm bg-primary text-white"
+     onclick="updateParagraph(); generate()">Generate Certificate</button>
+</div>
+  <div>
+    <p id="outputParagraph"></p>
+  </div>
+  <div class="opinion">
+    <p id="newParagraph"></p>
+  </div>
+<div>
+</div>
+
+</div>
+<script>
+function updateParagraph() {
+  const nameValue = document.getElementById('name').value;
+  const ageValue = document.getElementById('age').value;
+  const addressValue = document.getElementById('address').value;
+  const sufferingValue = document.getElementById('disease').value;
+  const fromValue = document.getElementById('from_date').value;
+  const toValue = document.getElementById('to_date').value;
+  const outputParagraph=document.getElementById('outputParagraph');
+  const newParagraph= document.getElementById('newParagraph');
+  const myDiv= document.getElementById('myDiv')
+  var myFormDiv = document.getElementById("myForm");
+  var signature = document.getElementById("signature");
+  // Concatenate the input values and set them as the paragraph's text content
+  outputParagraph.textContent =` ${nameValue} 
+   Age: ${ageValue} yrs  R/o- ${addressValue}; was suffering from ${sufferingValue} from 
+   ${fromValue} to ${toValue}.  Now he/she is fit to join his/her duties. `
+ 
+   myFormDiv.style.display="none";
+   signature.style.display="block";
+  }
+function generate(){
+//document.getElementById('generate').addEventListener('click', function() {
+  //Clear all input fields within the form
+ const form = document.getElementById('myForm');
+ const inputs = form.querySelectorAll('input'); // Select all input and textarea elements
+}
+ inputs.forEach(input => {
+  input.value = ''; // Set the value of each input field to an empty string
+ });
+
+  //Hide the generate button
+  this.style.display = 'none'; // Set the display style of the button to 'none'
+
+function newParagraph() {
+  const myDiv=document.getElementById('opinion');
+
+   const newParagraph = document.createElement('p');
+   newParagraph.textContent = 'In my opinion is cardio-respiratory failure suffering from CVA ';
+  myDiv.appendChild(newParagraph);
+
+}
+   
+</script>
+</body>
+</html>
+
+{% endblock %}

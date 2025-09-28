@@ -1,0 +1,21 @@
+@media print {
+    /* Hide the navigation bar */
+    .navbar {
+        display: none;
+    }
+
+    /* Hide any buttons */
+    .btn {
+        display: none;
+    }
+
+    /* Hide any forms or non-essential inputs */
+    form {
+        display: none;
+    }
+
+    /* Make sure all content is visible */
+    body {
+        margin: 0;
+    }
+}

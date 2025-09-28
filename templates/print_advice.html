@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Print Advice</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/print_button.css') }}">
+<style>
+    body{
+        margin: 0 auto;
+        width: 700px;
+        margin-left:120px
+
+    }
+    .printable-content {
+        max-width: 700px;
+        margin: 0 auto;
+    }
+    @media print {
+        body{
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .printable-content{
+            
+            margin: 0 auto;
+        }
+        .signatureDiv{
+            break-before: always;
+        }
+    }
+    .patient-info{
+        color: darkblue;
+        font-size: 16px;
+        font-weight: normal;
+        text-align: start;
+        vertical-align:top;        
+        margin-left: 12px;
+    }
+    
+.header-container {
+    display: flex; 
+    color: rgb(99, 32, 105);
+    justify-content: space-between; 
+    align-items: center;  
+    width: 70%;
+    height: 80px;
+    background-color: #fcfcfc; 
+    border-bottom:1px solid #52aebe;
+}
+
+/* Optional: Style the children elements */
+.header_left {
+    margin-left: 15px;
+    font-size: 12px;
+    padding-left: 0px;
+    line-height: 1;
+    color: rgb(95, 19, 114);
+}
+.name{
+    font-size: 20px;
+    line-height: 1;
+}
+
+.header_right  {
+    margin-right: 12px;
+    text-decoration: none;
+    color: #782883;
+}
+.advice{
+    display: flex;
+    width: 480px;
+    font-size: 14px;
+    color: darkblue;
+    margin-right: 0;
+    padding-left: 10px;
+    padding-top: 0px;
+    border-top: 1px solid  rgb(88, 136, 158);
+    border-bottom: 1px solid  rgb(88, 136, 158);
+    
+}
+.advHead{
+    margin-left: 24px;
+    margin-bottom: 20px;
+}
+.signatureDiv{
+    height: 90px;
+    margin-left: 40px;
+    padding-left: 20px;
+    margin-bottom: 0px;
+    width: 200px;
+}
+.sign{
+    height: 20px;
+    width: 140px;
+
+}
+
+</style>
+</head>
+<body>
+<div class="printable-content">
+    <header class="header-container">
+     <div class=" header_left ">
+       <p class=""><b class="name">{{current_user.username}}</b><br>    
+             {{current_user.degree}}<br>
+             {{ current_user.reg_no}} <br>
+       Mob: {{ current_user.doc_mob}}</p>
+              
+     </div>
+     <!-- <div class="col=md-3">
+       🩺
+     </div> -->
+   <div class="header_right" style="font-size:14px">
+        <p> {{ current_user.website}}<br>
+            Email: {{ current_user.email}} <br>
+        Date:<strong> {{ today.strftime('%d-%m-%Y') }}</strong></p>
+    </div>
+ 
+</header>
+<div class="patient-info"><small><p> Name: <b> {{ patient.name }}</b> Age:<b> {{patient.age}} yrs</b>
+     Gender:<b>{{ patient.gender}}</b> {{patient.address}} BP: {{patient.bp}}</p></small></div>
+<div class="advice p-0">
+        <div class="col-md-5"><br>
+          <P>BP:120/80 
+       wt: 65 kg  <br>
+       BMI: 23.7  <br>
+       C/O: Fever for 7 days  <br>
+       Past history:<br> Type II DM <br>
+       Lap Cholecystectomy  <br>
+        Allergic to: Sulfonamide </P> 
+        </div>
+      <div class="col-md-7">
+         <p class="advHead"><strong><u>Advice</u></strong><br>
+        <ul>
+            {% for drug in advice.prescribed_drugs %}
+                <li>{{ drug.name }}</li>
+            {% endfor %}
+        </ul>
+         </p>
+      </div> 
+</div>
+
+        <div class="signatureDiv">
+          <p class="sign"><img src="../static/signature.png" width="100px" /><br>
+            ( Dr N K Ghorai ) <br>
+          Date:<em> {{ today.strftime('%d-%m-%Y') }}</em></p>
+         
+        </div>
+           
+    </div>
+    </div>
+</div> 
+  <script>
+    window.onload = function() {
+        window.print();
+    }
+  </script>
+</body>
+</html>

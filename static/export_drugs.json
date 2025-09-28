@@ -1,0 +1,34 @@
+[
+  {
+    "id": 1,
+    "name": "Tab Paracetamol 650 - 1 tab thrice daily"
+  },
+  {
+    "id": 2,
+    "name": "Tab Paracetamol (650) - 1 tab stat and SOS"
+  },
+  {
+    "id": 3,
+    "name": "Cap Amoxycillin -500mg - 1 cap thrice daily x 7 days"
+  },
+  {
+    "id": 4,
+    "name": "Tab Ibuprofen 400mg -1 tab thrice daily x 3-4 days"
+  },
+  {
+    "id": 5,
+    "name": "Tab Cetirizine(10mg) -1 tab twice daily x 3 days"
+  },
+  {
+    "id": 6,
+    "name": "Cap Augmentin duo(1.2g) -1 tab twice daily x 7 days"
+  },
+  {
+    "id": 7,
+    "name": "Cap Autrin - 1 cap once daily x 3 mns"
+  },
+  {
+    "id": 8,
+    "name": "Inj, Mikacin 250mg im/iv twice daily x 7 days"
+  }
+]

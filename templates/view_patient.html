@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block title %}Patient: {{ patient.name }}{% endblock %}
+{% block content %}
+<h2>Patient: {{ patient.name }}</h2>
+<p>
+  {% if patient.age %}Age: {{ patient.age }}{% endif %}
+  {% if patient.gender %} | Gender: {{ patient.gender }}{% endif %}
+</p>
+<a href="{{ url_for('add_advice', patient_id=patient.id) }}" class="btn btn-success mb-3">Add Advice</a>
+<a href="{{ url_for('dashboard') }}" class="btn btn-secondary mb-3">Back to Dashboard</a>
+
+<h3>Advice History</h3>
+{% if advices %}
+  <ul class="list-group">
+    {% for advice in advices %}
+      <li class="list-group-item">
+        <p>{{ advice.text }}</p>
+        {% if advice.drugs %}
+          <p><strong>Drugs:</strong> {{ advice.drugs | map(attribute='name') | join(', ') }}</p>
+        {% endif %}
+      </li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <p>No advice added yet.</p>
+{% endif %}
+{% endblock %}

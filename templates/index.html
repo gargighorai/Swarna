@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+    <h1>Patient List</h1>
+    <ul class="list-group">
+        {% for patient in patients %}
+            <li class="list-group-item">
+                <a href="{{ url_for('patient_profile', patient_id=patient.id) }}">
+                    {{ patient.name }}
+                </a>
+            </li>
+        {% endfor %}
+    </ul>
+{% endblock %}

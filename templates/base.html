@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}{{current_user.username}}app{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<style>
+    body{
+        background-color: rgb(243, 238, 231);
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+    }
+    #wrapper {
+        flex: 1;
+    }   
+    .a{
+        text-decoration: none;
+        list-style: none;
+    }
+    ul, li{
+        text-decoration:none ;
+        list-style: none;
+    }
+    .footer {
+    background-color: rgb(241, 239, 237);
+    color: darkblue;
+    padding: 1rem 1.5rem; /* This is the key change to make it more packed */
+    font-size: 0.875rem;
+    line-height: 0.5rem;
+    margin: auto;
+    width:calc(100% - 35px);
+    margin-top: auto;
+    margin-bottom: 15px;
+}
+    .footer-links a  {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 5px;
+    }
+    .navbar{
+        background-color: #13334e;
+    }
+    /* You may also want to reduce the gap in the mobile view */
+@media (max-width: 768px) {
+    .footer-content {
+        flex-direction: column;
+        gap: 0.5rem; /* Reduced from 1rem */
+    }
+}
+</style>
+</head>
+<body>
+    <header>
+    <nav class="navbar navbar-expand-md navbar-light bg-light">
+        
+    </nav>
+</header>
+<div id="wrapper">
+    <nav class="navbar navbar-expand-md navbar-dark mb-0">
+    <div class="container">
+        <a class="navbar-brand d-flex align-items-center" href="#">
+             <img src="{{ url_for('static',filename='logo.png') }}" style="height:40px; border-radius: 30px;" alt="Logo" class="me-3"/>
+           <span>  🩺 &nbsp;&nbsp;{{current_user.username}}'s Clinic</span>
+        </a>
+        
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="true" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+            <ul class="navbar-nav d-flex align-items-center">
+                {% if current_user.is_authenticated %}
+                <li class="nav-item">
+                    <a class="btn btn-sm btn-light me-2" href="{{ url_for('dashboard') }}" class="btn btn-sm btn-primary">Dashboard</a>
+                     <a class="btn btn-sm btn-light me-2" href="{{ url_for('manage_drugs') }}" class="btn btn-sm btn-primary">Manage drugs</a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle btn btn-sm me-2 p-1 bg-light btn-light text-black" href="#" id="certificateDropdown" role="button" aria-expanded="false">Certificates</a>
+                    <ul class="dropdown-menu" aria-labelledby="certificateDropdown">
+                        <li><a class="dropdown-item" href="{{ url_for('medical_certificate') }}">Medical Certificate</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('fitness_certificate') }}">Fitness Certificate</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('custom_certificate') }}">Custom Certificate</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('certificate') }}">Death Certificate</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('receipt') }}">receipt</a></li>
+                       
+                    </ul>
+                </li>
+                <li class="nav-item">
+                    <a class="btn btn-sm btn-danger me-2" href="{{ url_for('logout') }}">Logout</a>
+                </li>
+                {% else %}
+                <li class="nav-item">
+                    <a class="btn btn-sm btn-light" href="{{ url_for('login') }}">Login</a>
+                </li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-2">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{category}} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+</div>
+
+<div class="content">
+    {% block content %} {% endblock %}
+</div>
+</div>
+<footer class="footer px-4">
+    <div class="footer-content">
+        <p>&copy; 2025 Sonai. All rights reserved.</p>
+        <div class="footer-links">
+            <a href="#">Privacy Policy</a>
+            <a href="#">Terms of Service</a>
+            <a href="#">Contact Us</a>
+        </div>
+    </div>
+</footer>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+      document.addEventListener('DOMContentLoaded', () => {
+        const alerts = document.querySelectorAll('.alert');
+        alerts.forEach(alert => {
+          setTimeout(() => {
+            alert.style.display = 'none';
+          }, 5000); // Hides after 3 seconds
+        });
+      });
+    </script>
+</body>
+</html>
+

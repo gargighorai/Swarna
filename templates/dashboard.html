@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<style>
+.header{
+  height:70px;
+  width:97vw;
+  padding-left: 10px;
+  background-color: beige;
+  border: 1px solid darkkhaki;
+  border-radius: 10px;
+  margin: 0px;
+}
+.info{
+  display: flex-end;
+}
+.table{
+  width: 97vw;
+  padding-left: 10px;
+  margin: 2px;
+  padding: 2px;
+}
+.btn {
+  padding: 1%;
+  margin: 1%;
+  font-size: 12px;
+}
+.addBtn{
+  padding: 5px;
+  font-size: 12px;
+  margin: 25px;
+  float: right;
+  margin-top: 5px;
+  margin-right: 12px;
+  margin-bottom: 6px;
+}
+</style>
+<header>
+  
+<div class="header container-fluid  mt-0  mx-2 ">
+    <div class=" d-flex  justify-content-between">
+      <div class="col-md-6  text-start">
+      <p class="mb-0">{{current_user.username}}<br>    
+         <p style="font-size:12px" class="mb-0"> {{current_user.degree}}</p>
+      <small><p class="mb-0" style="font-size: 10px;">{{ current_user.reg_no}} </p></small>
+     </div>
+   <div class="info col-md-6 text-end" style="font-size:12px">
+    <p> {{ current_user.website}}<br>
+      <small> Email: {{ current_user.email}} <br>
+      Mob: {{ current_user.doc_mob}}<br></small></p>
+   </div>
+  </div>   
+  </header>
+  
+<div>
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div id="flash-message-container" class="alert alert-{{ category }}">
+          {{ message }}
+        </div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+</div>
+
+    <div>
+     <a href="{{ url_for('add_patient') }}"
+    class="addBtn btn btn-sm btn-success">+ Add Patient</a>
+    </div>
+<div class="table">
+  
+<table class="table table-bordered bg-white">
+  <thead class="table-light fw-normal">
+    <tr style="font-size:12px ; font-weight:normal">
+      <th>Name</th>
+      <th>Age</th>
+      <th>Gender</th>
+      <th>Mobile</th><th>Address</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+  {% for patient in patients %}
+    <tr style="font-size: 12px;">
+      <td>{{ patient.name }}</td>
+      <td>{{ patient.age }}</td>
+      <td>{{ patient.gender }}</td>
+      <td>{{ patient.mob_no }}</td>
+      <td>{{patient.address}}</td>
+      <td>
+        
+       <a href="{{ url_for('create_patient_doc', patient_id=patient.id) }}" 
+   onclick="showDownloadMessage()" 
+   class="btn btn-primary">
+    Download Report (.docx)
+</a> <a href="{{ url_for('patient_profile', patient_id=patient.id) }}"class="btn btn-sm btn-info">View Advice</a>
+       <a href="{{ url_for('advice_history', patient_id=patient.id) }}" class="btn btn-sm btn-info">History</a>
+        <a href="{{ url_for('delete_patient',patient_id=patient.id) }}" class="btn btm-sm btn-danger">Delete</a>
+        
+        <!-- <a href="{{ url_for('print_advice', advice_id = patient.id)}}" class="btn btn-sm btn-success">print advice</a> -->
+      </td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+</div>
+<script src="{{ url_for('static', filename='js/flash_messages.js') }}">
+ function showDownloadMessage() {
+        alert("The document is downloading. Check your browser's download bar and click 'Open' to view it immediately!");
+    }
+</script>
+{% endblock %}

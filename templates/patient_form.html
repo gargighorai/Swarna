@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Document Generator</title>
+    <!-- Use Tailwind CSS for simplicity and speed -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for a cleaner look */
+        body {
+            @apply bg-gray-100 font-sans;
+        }
+        .container {
+            @apply max-w-4xl mx-auto p-8;
+        }
+        .card {
+            @apply bg-white p-6 rounded-lg shadow-md;
+        }
+        .input-group {
+            @apply mb-4;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="card">
+        <h1 class="text-3xl font-bold text-center mb-6">Patient Document Generator</h1>
+        
+        <form id="patientForm">
+            <!-- Doctor Info -->
+            <div class="input-group">
+                <label class="block text-gray-700 font-semibold mb-2">Doctor's Info</label>
+                <div class="border p-4 rounded-md bg-gray-50">
+                    <p class="font-bold">Dr.N K Ghorai</p>
+                    <p>MD </p>
+                    <p>[Lalbag]</p>
+                </div>
+            </div>
+
+            <!-- Patient Details -->
+            <h2 class="text-xl font-bold mt-8 mb-4">Patient Details</h2>
+            <div class="input-group">
+                <label for="patientName" class="block text-gray-700 mb-1">Name</label>
+                <input type="text" id="patientName" class="w-full p-2 border rounded-md" required>
+            </div>
+            <div class="input-group">
+                <label for="age" class="block text-gray-700 mb-1">Age</label>
+                <input type="number" id="age" class="w-full p-2 border rounded-md">
+            </div>
+            <div class="input-group">
+                <label for="gender" class="block text-gray-700 mb-1">Gender</label>
+                <input type="text" id="gender" class="w-full p-2 border rounded-md">
+            </div>
+            <div class="input-group">
+                <label for="address" class="block text-gray-700 mb-1">Address</label>
+                <input type="text" id="address" class="w-full p-2 border rounded-md">
+            </div>
+
+            <!-- Vitals and Complaints -->
+            <h2 class="text-xl font-bold mt-8 mb-4">Vitals & Complaints</h2>
+            <div class="input-group">
+                <label for="chiefComplaint" class="block text-gray-700 mb-1">Chief Complaint</label>
+                <textarea id="chiefComplaint" class="w-full p-2 border rounded-md h-24"></textarea>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div class="input-group">
+                    <label for="temperature" class="block text-gray-700 mb-1">Temperature (°C)</label>
+                    <input type="text" id="temperature" class="w-full p-2 border rounded-md">
+                </div>
+                <div class="input-group">
+                    <label for="bloodPressure" class="block text-gray-700 mb-1">Blood Pressure</label>
+                    <input type="text" id="bloodPressure" class="w-full p-2 border rounded-md">
+                </div>
+            </div>
+            <div class="input-group">
+                <label for="pulseRate" class="block text-gray-700 mb-1">Pulse Rate (bpm)</label>
+                <input type="text" id="pulseRate" class="w-full p-2 border rounded-md">
+            </div>
+
+            <!-- Advice & Prescription -->
+            <h2 class="text-xl font-bold mt-8 mb-4">Advice & Prescription</h2>
+            <div class="input-group">
+                <label for="advice" class="block text-gray-700 mb-1">Advice</label>
+                <textarea id="advice" class="w-full p-2 border rounded-md h-24"></textarea>
+            </div>
+            <div class="input-group">
+                <label for="prescription" class="block text-gray-700 mb-1">Prescription (comma-separated)</label>
+                <textarea id="prescription" class="w-full p-2 border rounded-md h-24" placeholder="e.g., Ibuprofen, Amoxicillin"></textarea>
+            </div>
+
+            <button type="button" id="downloadDocxBtn" class="w-full bg-blue-500 text-white font-bold py-3 rounded-md hover:bg-blue-600 transition duration-300 mt-6">
+                Download Word Document
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- All required libraries and logic in one place -->
+<script type="module">
+    // Changed the import to use named exports which the library provides.
+    import { Docxtemplater } from "https://cdn.jsdelivr.net/npm/docxtemplater@3.37.1/build/docxtemplater.js";
+    import { PizZip } from "https://cdn.jsdelivr.net/npm/pizzip@3.1.4/dist/pizip.js";
+    import { saveAs } from "https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.js";
+
+    // DOCX template Base64
+    const docxTemplateBase64 = "UEsDBBQABgAIAAAAIQCS7a4W4wEA+QMAABEAAAAAAgAAAGRvY1Byb3BzL2NvcmUueG1sIKjIywfDMAyG78D/EPu7dJt2q4U6aQ+T1E67s8dOQk1Z8f89oJgE5J61e1bLgWfJb1P+QxT+Rj7S6aWc4i9YgI7Q+K+K+kFk7/U9D5J76Vd8J73c153hN/2j+hj3Db2zvb1Z3j9KA+MZ/4eTXeEDwW/wr15N/lf+1PQXyn7eTqkjvAaAnmPvvYfov/QXPTNB/m/wv/Jb2XwAAbf2n/x/f3n//H+X/4f9k9g1mO+zF//jHq23xQSwMEFAAIAAgAAAAhAJW1T9y0AAAAXQMAABYAAAAAAgAAAHdvcmQvZm9udFRhYmxlLnhtbJRU3W6DIBC+F/Qf3Lsh6x+iYjIJCJzD1aK7+tA9xM4p9u/z7gB7g+Y+QZ2yvJgG8r2/2x64g0d216FvQfRDAo1D4X8D2+2B+7v/GjW19GvR6sOqgB70hB9m5D98B66H/g3d4j2oQ/QfP4g0996D/0H94h9oI/6D/Rj2oA/6wR50hB90gjvo6n8p9eJv9/T9h3pL9fK2U2bI5Aag+t3fO+D6XvS/mQ20x+n2Q/k/t2f/x/f9L/2L2A2Y+yD/h/s38GPeNvau9vVneP0oD4xnvh5Ff4h76K/hXj67/G/+d/2n6e/p7e7j7+wAAdw/7L+j9+n+0v9j/g/3f7j9gN2P+g/3b+DHeNvb29vVnef0oD4xnvh5Nf4gW4y/gr15N/p//T9BfKf95OqSO8BoCea+/D+i/9Bc9M0H+b/C/8lvZfAABn/tL/j9rfg/a+9nwPYNZnvsxf/4x6t98UEsBAhQAFAAGAAgAAAAhAJO2uFucBAABAwAAABEAAAAAAAAAAAAAAAABAAAAZG9jUHJvcHMvY29yZS54bWxQSwECFAAUAAgACAAAACEAlbVP3LQAAABdAwAAFgAAAAAAAAAAAAAAAgAAAHdvcmQvZm9udFRhYmxlLnhtbFBLBQYAAAAAAgACAHkAAAAtAgAAAAA=";
+
+    document.getElementById('downloadDocxBtn').addEventListener('click', () => {
+        // Collect data from the form
+        const patientData = {
+            patientName: document.getElementById('patientName').value || 'N/A',
+            age: document.getElementById('age').value || 'N/A',
+            gender: document.getElementById('gender').value || 'N/A',
+            address: document.getElementById('address').value || 'N/A',
+            chiefComplaint: document.getElementById('chiefComplaint').value || 'N/A',
+            temperature: document.getElementById('temperature').value || 'N/A',
+            bloodPressure: document.getElementById('bloodPressure').value || 'N/A',
+            pulseRate: document.getElementById('pulseRate').value || 'N/A',
+            advice: document.getElementById('advice').value || 'N/A',
+            // Split the prescription field by comma and trim whitespace
+            prescription: (document.getElementById('prescription').value || '').split(',').map(item => item.trim()).filter(Boolean)
+        };
+        
+        // Prepare prescription list for the template
+        const prescriptionListForDocx = patientData.prescription.map(item => ({ drug: item }));
+
+        // Load the Base64 template
+        const templateAsBinary = atob(docxTemplateBase64);
+        const zip = new PizZip(templateAsBinary);
+        const doc = new Docxtemplater(zip, { paragraphLoop: true, linebreaks: true });
+
+        // Set the data and render the document
+        doc.setData({
+            doctorName: 'Dr.N K Ghorai',
+            specialization: 'MD',
+            hospital: 'Lalbag',
+            date: new Date().toLocaleDateString(),
+            ...patientData,
+            prescription: prescriptionListForDocx
+        });
+
+        try {
+            doc.render();
+            const out = doc.getZip().generate({ type: "blob", mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document" });
+            saveAs(out, "patient_record.docx");
+            console.log("Document generated successfully.");
+        } catch (error) {
+            console.error("Error generating document:", error);
+        }
+    });
+</script>
+</body>
+</html>

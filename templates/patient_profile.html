@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block title %}{{ patient.name }}{% endblock %}
+{% block content %}
+<style>
+    .patient-info{
+        color: rgb(7, 52, 70);
+        font-size: 14px;
+        font-weight: normal;
+        width: 90%;
+        border: 1px solid rgb(228, 154, 69);
+        vertical-align:middle;
+        height: 22px;
+        margin-left: 30px;
+    }
+    .header{
+        background-color: rgb(238, 237, 235);
+        margin-top: 0;
+        padding-top: 0;
+        padding-left: 10px;
+        padding-right: 10px;
+        margin: 0px;
+    }
+    .patient-card,.advice-card{
+        border: 1px solid #eef1f1;
+         padding: 2px; 
+         margin-bottom: 2px;
+         margin-left :5px;
+}
+.doctor-left, .doctor-info{
+    color: #072270;
+}
+
+.advice-card{
+    position :relative;
+    width: 70%;
+    margin-left: auto;
+    margin-right: auto;
+}
+</style>
+<div class="container-fluid  mt-0  ">
+    <div class="header d-flex justify-content-between me-0">
+      
+      <div class=" doctor-left col-md-6  text-start">
+          <h5 class="mb-0">🩺{{current_user.username}}</h5>    
+             <p style="font-size:12px" class="mb-0"> {{current_user.degree}}</p>
+           <small><p class="mb-0" style="font-size: 10px;">{{ current_user.reg_no}} </p></small>
+       </div>
+        <div class="doctor-info col-md-6 text-end" style="font-size:12px">
+           <p> {{ current_user.website}}<br>
+           <small> Email: {{ current_user.email}} <br>
+           Mob: {{ current_user.doc_mob}}<br></small>
+           Date: <b>{{ today.strftime('%d-%m-%Y')}}</b></P>
+        </div>
+  </div>
+</div>
+<div class="patient-info"><small>
+    <p> Name: {{ patient.name }} Age: {{patient.age}} yrs
+     Gender:{{ patient.gender}} {{patient.address}}:
+    {{patient.bp}}</p></small></div>
+    
+    {% if patient.advice %}
+        {% for advice in patient.advice %}
+            <div>
+            <div class="advice-card">
+              <div> <p><strong><u>Advice</u></strong></p>
+           <div class="d-flex"><ul>
+                    {% for drug in advice.prescribed_drugs %}
+                        <li>{{ drug.name }}</li>
+                   
+                    {% endfor %}
+                </ul></p>
+              </div>
+                 <p><strong>Other Advices:</strong> {{ advice.advice_text }}</p>
+              </div>
+            
+              <div class="button-end">
+               
+                  <form action="{{ url_for('delete_advice', advice_id=advice.id) }}" method="post" style="display:text-end;">
+                   <button type="submit" class="delete-btn btn-outline-danger bg-danger" title="Delete Advice">&times;</button>
+                 </form>
+            <a href="{{ url_for('create_patient_doc', patient_id=patient.id) }}" 
+                 onclick="showDownloadMessage()" 
+                 class="btn btn-primary">
+               Download Report (.docx)
+           </a>  
+        </div>   
+        </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>No advice has been given to this patient yet.</p>
+    {% endif %}
+    <script>
+    function showDownloadMessage() {
+        alert("The document is downloading. Check your browser's download bar and click 'Open' to view it immediately!");
+         }
+     </script>
+    {% endblock %}

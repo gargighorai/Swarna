@@ -1,0 +1,139 @@
+{% extends 'base.html'%}
+{% block title %}Payment Receipt{% endblock %}
+{% block content %}
+<style>
+    body{
+        margin: 0;
+        padding: 0;
+        min-height: 100vh;
+    }
+    .footer{
+        margin-top: auto;
+    }
+    .form-container{
+        margin-top: 20px;
+        margin-bottom: 20px;
+        padding: 10px;
+        background-color: rgb(240, 240, 240);
+        width: 500px;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        margin-left: auto;
+        margin-right: auto;
+    }
+    #myForm {
+        background-color:rgb(240, 240, 240);
+        padding:18px;
+        width:480px;
+        margin-left: auto;
+        margin-right: auto;
+    
+    }
+    .refresh{
+        display: none;
+        background-color: darkblue;
+    }
+    .outputText{
+        width: 490px;
+        /* background-color: rgb(235, 231, 221); */
+        color: rgb(18, 18, 80);
+        margin-left: auto;
+        margin-right: auto;
+    }
+    .signature{
+        text-align: left;
+        margin-top: 20px;
+        margin-left: auto;
+        display: none;
+    }
+</style>
+</head>
+<body>
+    <div>
+    <h5 class="text-center">From Dr. Ghorai's Desk</h5><hr>
+  <p><h6 class="text-center "><u>Payment Receipt</u></h6></p>
+  
+    <div class="form-container justify-content-center align-content-center p-2">
+    <div class="outputText">
+    <p id="outputParagraph"></p>
+  </div>
+        <form id="myForm">
+        <table><thead> 
+            <th></th><th></th><th></th></thead>
+            <tr>
+                <td>Date:</td><td>{{now.strftime('%d-%m-%Y')}}</td>
+            </tr>
+            <tr>
+                <td><b id="rupeeSign"> &#8377;</b></td>
+                <td><input type="text" id="number" ><td><b>Rupees</b> <b id= "words"></b></td>
+                </td>
+            </tr>              
+            <tr>
+            <td>Name:</td><td><input type="text" id="name" ></td>
+            </tr>
+            <tr>
+            <td>Age: </td><td><input type="text" id="age" > </td>
+            </tr>
+            <tr>
+            <td colspan="2">
+               <button class="btn btn-sm bg-success mt-4 text-white w-100" 
+               type="button" onclick="generateReceipt();">Generate Receipt</button> </td>
+            </tr>
+        </tr>
+        </table>
+          </form> 
+ <div class="signature" id="signature">
+    <img src="/static/signature.png"  width="80px" />
+    <p>{{now.strftime('%d-%m-%Y')}}</p>
+    <p style="color:darkblue">( Dr. N K Ghorai )</p>
+    </div>  
+      <div>
+         <button class=" refresh btn btm-sm bg-success mt-2 text-white" id="refreshBtn" type="button" onclick="location.reload()">Show Form</button>
+     </div>
+        </div>
+<script>
+        var a = ['','One ','Two ','Three ','Four ', 'Five ','Six ','Seven ','Eight ','Nine ','Ten ','Eleven ','Twelve ','Thirteen ','Fourteen ','Fifteen ','Sixteen ','Seventeen ','Eighteen ','Nineteen '];
+        var b = ['', '', 'Twenty','Thirty','Forty','Fifty', 'Sixty','Seventy','Eighty','Ninety'];
+
+    function inWords (num) {
+    if ((num = num.toString()).length > 9) return 'overflow';
+    n = ('000000000' + num).substr(-9).match(/^(\d{2})(\d{2})(\d{2})(\d{1})(\d{2})$/);
+    if (!n) return; var str = '';
+    str += (n[1] != 0) ? (a[Number(n[1])] || b[n[1][0]] + ' ' + a[n[1][1]]) + 'Crore ' : '';
+    str += (n[2] != 0) ? (a[Number(n[2])] || b[n[2][0]] + ' ' + a[n[2][1]]) + 'Lakh ' : '';
+    str += (n[3] != 0) ? (a[Number(n[3])] || b[n[3][0]] + ' ' + a[n[3][1]]) + 'Thousand ' : '';
+    str += (n[4] != 0) ? (a[Number(n[4])] || b[n[4][0]] + ' ' + a[n[4][1]]) + 'Hundred ' : '';
+    str +=(n[5] != 0) ? ((str != '') ? 'and ' : '') + (a[Number(n[5])] || b[n[5][0]] + ' ' + a[n[5][1]]) + 'only ' : ''; 
+    return  str ;
+
+}
+
+document.getElementById('number').onkeyup = function () {
+    document.getElementById('words').innerHTML = inWords(document.getElementById('number').value);
+};
+function generateReceipt() {
+    let today = new Date()
+     const y=today.getFullYear()
+     const m=String(today.getMonth() + 1).padStart(2,'0');
+     const d =String(today.getDate()).padStart(2,'0');
+     const fDate= `${d}-${m}-${y}`;
+     const nameValue= document.getElementById("name").value;
+     const ageValue= document.getElementById("age").value;
+     const rupeeSignValue= document.getElementById("rupeeSign").textContent;
+     const numberValue= document.getElementById("number").value;
+     const wordsValue= document.getElementById("words").textContent;
+     const form= document.getElementById('myForm');
+     const refreshBtn = document.getElementById('refreshBtn');
+    const outputParagraph =document.getElementById('outputParagraph');
+    const signatureDiv = document.getElementById('signature');
+     outputParagraph.textContent = ` Received ${rupeeSignValue} ${numberValue}/- ( ${wordsValue} only ) with thanks from  ${nameValue} age: ${ageValue} yrs
+      on ${fDate} as consultation fees . `
+      myForm.style.display="none";
+      refreshBtn.style.display ="block";
+      signatureDiv.style.display="block";
+}
+   
+    </script>
+</body>
+
+{% endblock %}
