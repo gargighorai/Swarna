@@ -71,18 +71,16 @@
                     {% endfor %}
                 </ul></p>
               </div>
-                 <p><strong>Other Advices:</strong> {{ advice.advice_text }}</p>
               </div>
             
-              <div class="button-end">
+              <div class=" d-flex align-content-end flex-end">
                
                   <form action="{{ url_for('delete_advice', advice_id=advice.id) }}" method="post" style="display:text-end;">
-                   <button type="submit" class="delete-btn btn-outline-danger bg-danger" title="Delete Advice">&times;</button>
+                   <button type="submit" class="btn btn-sm text-end delete-btn  bg-danger text-white" title="Delete Advice">&times;</button>
                  </form>
             <a href="{{ url_for('create_patient_doc', patient_id=patient.id) }}" 
                  onclick="showDownloadMessage()" 
-                 class="btn btn-primary">
-               Download Report (.docx)
+                 class="btn btn-primary p-0"> Download
            </a>  
         </div>   
         </div>
@@ -92,8 +90,6 @@
         <p>No advice has been given to this patient yet.</p>
     {% endif %}
     <script>
-    function showDownloadMessage() {
-        alert("The document is downloading. Check your browser's download bar and click 'Open' to view it immediately!");
-         }
+   
      </script>
     {% endblock %}

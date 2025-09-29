@@ -1,101 +1,122 @@
-{% extends "base.html" %}
-{% block title %}Give Advice{% endblock %}
+{% extends 'base.html' %}
 {% block content %}
+<h6 class="col-md-12 text-center">Give Advice for {{ patient.name }}</h6>
 <style>
- .availDrug ,.presDrug{
+ .selected{
+  width: 50%;
+  height: 100%;
+  border: none;
   font-size: 12px;
-  width: 310px;
+  color: blue;
  }
- .availDrug{
-  color: rgb(16, 21, 87);
- }
- #avaiablList{
+ .button{
   color: red;
  }
- .presDrug{
-  color: rgb(25, 197, 111);
+ .li{
+  color: red;
  }
- .btn{
-  width: 200px;
+ .removeBtn{
+  height: 18px;
+  padding: 0%;
+  vertical-align: center;
+  width: 14px;
+  border: none;
+  background-color: red;
+  color: white;
+  margin: 1px;
+
+ }
+ .availDrug{
+  max-height:300px; 
+  overflow-y:auto;
+  font-size: 12px;
+  color: rgb(9, 12, 56);
+  background-color: beige;
  }
 </style>
-    <div class="container-fluid mt-1">
-        <h6>Give Advice for {{ patient.name }}</h6>
-        {% with messages = get_flashed_messages(with_categories=true) %}
-          {% if messages %}
-            <ul class=flashes>
-            {% for category, message in messages %}
-              <li class="{{ category }}">{{ message }}</li>
-            {% endfor %}
-            </ul>
-          {% endif %}
-        {% endwith %}
-        <form action="{{ url_for('give_advice', patient_id=patient.id) }}" method="POST">           
-            <div class="d-flex">
-                
-                <div class="col-md-6">
-                    <small><h6 class="heading bg-success text-white p-1">Prescribed Drugs</h6></small>
-                    <ul id="prescribedList" class="presDrug list-group" style="cursor:pointer;" onclick="removrDrug(this)">
-                        <li class="list-group-item drug-item" style="cursor:pointer;" onclick="addDrug(this)">
-                          {{ drug.name }}
-                        </li>
-                    </ul>
-                </div>
-                <div class="col-md-6">
-                    <small><h6 class="bg-primary text-white p-1">Available Drugs</h6></small>
-                    <ul id="availableList" class="availDrug list-group">
-                      {% for drug in available_drugs %}
-                        <li class="list-group-item drug-item" style="cursor:pointer;" onclick="addDrug(this)">
-                          {{ drug.name }}
-                        </li>
-                      {% endfor %}
-                    </ul>
-                </div>
+<form method="POST" id="adviceForm">
+    <!-- Selected Drugs -->
+  <div class="container-fluid">
+    <div class="d-flex">
+       <div class=" selected col-md-6">
+            <label class="form-label">Selected Drugs:</label>
+            <div id="selected-drugs" class="border p-2" style="min-height:200px;">
+                <em class="text-muted" >No drugs selected</em>
             </div>
-            <input type="hidden" name="prescribed_drugs" id="prescribedDrugsInput">
-            <br><br>
-            <button type="submit" class="btn btn-sm bg-primary text-white">Save Advice</button>
-        </form>
+        </div>
+        <div class="available col-md-6">
+            <label class="form-label">Available Drugs:</label>
+            <div id="drug-list" class="availDrug border p-2" 
+            style="max-height:300px; overflow-y:auto;">
+                <!-- drugs will be loaded here -->
+            </div>
+        </div>
     </div>
-    <script>
-        function addDrug(element) {
-            // Get the name of the drug from the clicked list item
-            const drugName = element.innerText.trim();    
-            // Get the prescribed drugs input field and list
-            const prescribedInput = document.getElementById('prescribedDrugsInput');
-            const prescribedList = document.getElementById('prescribedList');  
-            // Update the hidden input field with the new drug name
-            if (prescribedInput.value) {
-                // Append a comma if there's already a drug
-                prescribedInput.value += `, ${drugName}`;
-            } else {
-                // Otherwise, just add the first drug name
-                prescribedInput.value = drugName;
-            }    
-            // Create a new list item for the prescribed column
-            const newListItem = document.createElement('li');
-            newListItem.className = 'list-group-item prescribed-item';
-            newListItem.innerText = drugName;          
-            // Append the new list item to the prescribed list
-            prescribedList.appendChild(newListItem);
-          }
-// ----------------------Remove Drug Logic ---------------------------
-  function RemoveDrug(element){
-           
-             prescribedList.addEventListener('click', (event) => {
-                const li = event.target.closest('li');
-                if (li && selectedDrugIds.has(li.dataset.drugId)) {
-                    const drugIdToRemove = li.dataset.drugId;
-                    li.remove();
-                    selectedDrugIds.delete(drugIdToRemove);
-                    updateHiddenInput();
-                    const originalLi = document.querySelector(`.available-drug[data-drug-id="${drugIdToRemove}"]`);
-                    if (originalLi) {
-                        originalLi.removeAttribute('data-selected');
-                    }
-                }
+
+    <br>
+    <button type="submit" class="btn btn-primary">Save Advice</button>
+</div>
+  </form>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const drugList = document.getElementById("drug-list");
+    const selectedDrugs = document.getElementById("selected-drugs");
+
+    // Fetch drugs from server
+    fetch("/api/drugs")
+        .then(response => response.json())
+        .then(data => {
+            data.forEach(drug => {
+                let li = document.createElement("li");
+                li.className = "list-group-item list-group-item-action";
+                li.style.cursor = "pointer";
+                li.textContent = drug.name;
+                li.dataset.id = drug.id;
+
+                li.addEventListener("click", function() {
+                    addDrug(drug.id, drug.name);
+                });
+
+                drugList.appendChild(li);
             });
-       
-          }
-    </script>
+        });
+   const placeholder = selectedDrugs.querySelector(".text-muted");
+    if (placeholder) {
+        placeholder.remove();
+    }
+    function addDrug(id, name) {
+        // Remove placeholder
+        if (selectedDrugs.querySelector(".text-muted")) {
+            selectedDrugs.innerHTML = "";
+        }
+
+        // Prevent duplicate
+        if (document.getElementById("drug-" + id)) {
+            return;
+        }
+
+        // Create prescribed drug item
+        let li = document.createElement("li");
+        li.className = "list-group-item d-flex justify-content-between align-items-center";
+        li.id = "drug-" + id;
+
+        li.innerHTML = `
+            <span>${name}</span>
+            <button type="button" class="removeBtn ">x</button>
+            <input type="hidden" name="drugs" value="${id}">
+        `;
+
+        // Remove button action
+        li.querySelector("button").addEventListener("click", function() {
+            li.remove();
+            if (!selectedDrugs.hasChildNodes()) {
+                selectedDrugs.innerHTML = '<li class="list-group-item text-muted">No drugs selected</li>';
+            }
+        });
+
+        selectedDrugs.appendChild(li);
+    }
+});
+</script>
 {% endblock %}

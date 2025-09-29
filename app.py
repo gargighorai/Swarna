@@ -19,6 +19,8 @@ from werkzeug.utils import secure_filename
 from sqlalchemy.orm import joinedload
 from docx import Document
 from docx.shared import Inches,Pt,Cm,RGBColor
+from docx.oxml import OxmlElement
+from docx.oxml.ns import qn
 from docx.enum.table import WD_ALIGN_VERTICAL
 from docx.enum.text import WD_ALIGN_PARAGRAPH,WD_TAB_ALIGNMENT, WD_TAB_LEADER
 from models import db, User, Patient, Advice, Drug
@@ -49,12 +51,25 @@ def allowed_file(filename):
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 # --- Helper Function to Apply Shading (Background Color) ---
-def set_cell_text(cell, text, rgb_tuple=None):
-    cell.text=""
-    p=cell.paragraphs[0]
-    run = p.add_run(text)
-    if rgb_tuple:
-        run.font.color.rgb = RGBColor(*rgb_tuple)
+def set_table_border_color(table, color="D3D3D3"):  # hex color for light gray
+    tbl = table._tbl  # access the XML
+    tblPr = tbl.tblPr
+     
+    tblBorders = OxmlElement('w:tblBorders')
+    if tblBorders is None:
+        tblBorders = OxmlElement('w:tblBorders')
+        tblPr.append(tblBorders)
+
+    for border_name in ['top', 'left', 'bottom', 'right', 'insideH', 'insideV']:
+        border = tblBorders.find(qn(f'w:{border_name}'))
+        if border is None:
+            border = OxmlElement(f'w:{border_name}')
+            tblBorders.append(border)
+        border.set(qn('w:val'), 'single')       # line style
+        border.set(qn('w:sz'), '4')             # width (twips)
+        border.set(qn('w:space'), '0')
+        border.set(qn('w:color'), color)        # border color
+ 
 def format_table_header(table, bg="0070C0", text=(255, 255, 255)):
     hdr_cells = table.rows[0].cells
     for cell in hdr_cells:
@@ -302,7 +317,6 @@ def login():
     if request.method == "POST":
         email = request.form["email"]
         password_hash = request.form["password"]
-
         user = User.query.filter_by(email=email).first()
         if user and check_password_hash(user.password_hash, password_hash):
             login_user(user)
@@ -347,12 +361,13 @@ def add_patient():
     
     return render_template("add_patient.html")
 from datetime import date
-@app.route('/patient_profile/<int:patient_id>')
+@app.route('/patient/<int:patient_id>')
 def patient_profile(patient_id):
     # Find the patient by ID.
-    patients=Patient.query.get_or_404(patient_id)
+    patient=Patient.query.get_or_404(patient_id)
+    advices = Advice.query.filter_by(patient_id=patient.id).order_by(Advice.timestamp.desc()).all()
     today=date.today()   
-    return render_template('patient_profile.html', patient=patients, today=today)
+    return render_template('patient_profile.html', patient=patient, today=today)
 
 @app.route('/print_advice/<int:advice_id>')
 def print_advice(advice_id):
@@ -441,32 +456,32 @@ from flask import render_template, request, flash, redirect, url_for
 
 @app.route('/give_advice/<int:patient_id>', methods=['GET', 'POST'])
 def give_advice(patient_id):
-    patient = Patient.query.get_or_404(patient_id)    
+    patient = Patient.query.get_or_404(patient_id) 
+    drugs= Drug.query.order_by(Drug.name).all()  
     # This block handles the form submission (POST request)
     if request.method == 'POST':
-        prescribed_drugs_str = request.form.get('prescribed_drugs')        
-        prescribed_drug_names = [name.strip() for name in prescribed_drugs_str.split(',') if name.strip()]        
-        # Find the Drug objects in the database
-        prescribed_drugs = Drug.query.filter(Drug.name.in_(prescribed_drug_names)).all()        
-        new_advice = Advice( patient=patient)        
-        for drug in prescribed_drugs:
-            new_advice.prescribed_drugs.append(drug)            
-        try:
-            db.session.add(new_advice)
-            db.session.commit()
-            flash("Advice saved successfully!", 'success')
-            return redirect(url_for('patient_profile', patient_id=patient.id))
-        except Exception as e:
-            db.session.rollback()
-            flash(f"An error occurred: {e}", 'danger')
-            return redirect(url_for('give_advice', patient_id=patient.id))          
-    # This block handles displaying the page (GET request)
+        selected_drugs= request.form.getlist('drugs')
+        #Create advice entry
+        advice=Advice(patient_id=patient.id)
+        db.session.add(advice)
+        db.session.commit()
+
+        for drug_id in selected_drugs:
+            drug= Drug.query.get(int(drug_id))
+            if drug:
+                advice.prescribed_drugs.append(drug)
+        
+        db.session.commit()
+        flash("Advice successfully saved","success")
+        return redirect(url_for('patient_profile', patient_id=patient.id)) 
     available_drugs = Drug.query.all()
     return render_template('give_advice.html', patient=patient, available_drugs=available_drugs)
-
+from flask import jsonify
 @app.route("/api/drugs")
 def get_drugs():
     # Query the database to get all drug entries
+    drugs=Drug.query.order_by(Drug.name).all()
+    return jsonify([{"id":d.id, "name":d.name } for d in drugs])
     all_drugs = Drug.query.all()
     # This makes them easily convertible to JSON.
     drugs_list = [
@@ -492,150 +507,108 @@ def data_entry_form():
     return render_template('patient_form.html', patient_id=1001, available_drugs=available_drugs,today=now)
 
 # New Route to export as  Docx file --
+
+from flask import send_file
+from docx import Document
+from docx.shared import Pt
+from docx.oxml import OxmlElement
+from docx.oxml.ns import qn
+import io
+from datetime import datetime
 @app.route('/create_patient_doc/<int:patient_id>')
 def create_patient_doc(patient_id):
-    # Fetch patient data using the ID from the URL
-    patient = Patient.query.options(joinedload(Patient.advice).joinedload(Advice.prescribed_drugs)).get_or_404(patient_id)   
-    # Get doctor data from the currently logged-in user
-    doctor_data = {
-        'name': current_user.username,
-        'specialization': current_user.degree,
-        'reg_no': current_user.reg_no,
-        'doc_mob':current_user.doc_mob,
-        'website':current_user.website,
-    }
-    doc = Document()
-    section= doc.sections[0]
-    section.top_margin= Cm(1.0)
-    # Recommended: Also set other margins for consistency
-    section.bottom_margin = Cm(1.0)
-    section.left_margin = Inches(1.0)
-    section.right_margin = Inches(1.0)
-    # --- Doctor and Document Header Section ---
-    header_table = doc.add_table(rows=1, cols=2)
-    header_table.style = 'Table Grid'
-    header_table.autofit = True  
-    format_table_header(header_table, bg="0070C0", text=(255, 255, 255))
-    # Left cell for Doctor Info
-    doctor_cell1 = header_table.cell(0, 0)
-    #right cell for other info
-    docCell2= header_table.cell(0,1)
-
-    #doctor_cell1.width = Cm(10) # Set a fixed width
-   # set_cell_background(doctor_cell1,"4F81BD")
-   # set_cell_background(docCell2,"92CDDC")
-   # set_cell_text(doctor_cell1, "", (255, 255, 255))
-    #set_cell_text_color(doctor_cell1, (255, 255, 255)) 
-    doctor_para = doctor_cell1.paragraphs[0]
-    dp1= doctor_para.add_run(doctor_data['name'])
-    dp1.font.size= Pt(22)
-    dp1.bold==True
-    dp1.font.name='Times New Roman'
-    doctor_para.add_run(f"\n{doctor_data.get('specialization', '')}")
-    doctor_para.add_run(f"\nReg. No: {doctor_data.get('reg_no', '')}")
-    # Right cell for date & website
-    date_cell = header_table.cell(0, 1)
-    date_cell.width = Cm(8) # Set a fixed width
-    right_para = date_cell.paragraphs[0]
-    right_para.add_run(f"\n{doctor_data.get('website', '')}")
-    right_para.add_run(f"\nMobile:{doctor_data.get('doc_mob','')}" )
-    right_para.add_run(f"\nDate: {datetime.now().strftime('%d-%m-%Y')}")
-    detailPara= doc.add_heading('')
-    detailPara.add_run('')
-    run_underlined = detailPara.add_run('Patient details')
-    run_underlined.underline =True
-    detailPara.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    #doc.add_heading('patient details') ==WD_ALIGN_PARAGRAPH.CENTER
- # --- Patient Details Section ---
-    p_details = doc.add_paragraph()
-    p_details.add_run('Name: ').bold = True
-    p_details.add_run( patient.name).bold = True
-    p_details.add_run(' | Age: ')
-    p_details.add_run(str(patient.age)).bold = True
-    p_details.add_run(' | Gender: ')
-    p_details.add_run(patient.gender).bold = True  
-    p_details.add_run(' | Address: ')
-    p_details.add_run(patient.address).bold = True
-    
-    # --- Main Content Section (Two-Column Layout) ---
-    content_table = doc.add_table(rows=1, cols=2)
-    content_table.autofit = False
-    content_table.style = 'Table Grid'
-    
-    # Left Column: Vitals and Complaints
-    vitals_cell = content_table.cell(0, 0)
-    vitals_cell.vertical_alignment = WD_ALIGN_VERTICAL.TOP
-    vitals_cell.width = Cm(6)
+    patient = Patient.query.get_or_404(patient_id)
+    document = Document() 
+    section = document.sections[0]
+    section.top_margin = Cm(1)       # 1 cm
+    section.bottom_margin = Inches(1) # 1 inch
+    section.left_margin = Inches(1.7)   # 1 inch
+    section.right_margin = Inches(1)  # 1 inch
    
-    vitals_cell.add_paragraph('Vitals & Complaints')
-    
-    # Since your patient model doesn't have these fields, we'll use placeholders
-    vitals_cell.paragraphs[0].add_run('\nChief Complaint: ')
-    vitals_cell.paragraphs[0].add_run('N/A').bold = True
+    # --- Utility: faint / invisible table borders ---
+    def set_table_borders(table, color="FFFFFF", size="2"):
+        tbl = table._tbl
+        tblPr = tbl.tblPr
+        tblBorders = OxmlElement('w:tblBorders')
+        for border_name in ['top','left','bottom','right','insideH','insideV']:
+            border = OxmlElement(f'w:{border_name}')
+            border.set(qn('w:val'), 'single')
+            border.set(qn('w:sz'), size)   # thin line
+            border.set(qn('w:space'), '0')
+            border.set(qn('w:color'), color)  # D3D3D3 = faint gray, "FFFFFF" = invisible
+            tblBorders.append(border)
+        tblPr.append(tblBorders)
 
-    vitals_cell.paragraphs[0].add_run('\nTemp.: ')
-    vitals_cell.paragraphs[0].add_run('N/A').bold = True
-    
-    vitals_cell.paragraphs[0].add_run('\nBP: ').bold=True
-    vitals_cell.paragraphs[0].add_run('N/A').bold = True
-    
-    vitals_cell.paragraphs[0].add_run('\nPulse: ')
-    vitals_cell.paragraphs[0].add_run('N/A').bold = True
+    # --- Header: Doctor Info ---
+    header_table = document.add_table(rows=1, cols=2)
+    row = header_table.rows[0]
+    left = row.cells[0]
+    right = row.cells[1]
+    doctor=current_user
+    left.text = f"{doctor.username}\n{doctor.degree}\n{doctor.reg_no}"
+    right.text = f"Mob:{doctor.doc_mob}\n{doctor.website}\nEmail us:{doctor.email}\nDate:{datetime.now().strftime('%d-%m-%Y')}"
+    set_table_borders(header_table,  color="FFFFFF", size="2")  # invisible borders
+    header_table.autofit=False
+    header_table.columns[0].width = Inches(5)   # left column wider
+    header_table.columns[1].width = Inches(2)   # right column smaller
+    document.add_paragraph()  # spacing
+
+    # --- Patient Info Row ---
+    pat_table = document.add_table(rows=1, cols=1)
+    pat_table.rows[0].cells[0].text = (
+        f" Name: {patient.name}  | "
+        f"Age: {patient.age} yrs |"
+        f" {patient.gender}  | "
+        f"Address:{patient.address}  "
+    )
+    set_table_borders(pat_table, color="D3D3D3", size="2")  # faint border
+
+    document.add_paragraph()  # spacing
+
+    # --- Two Column Layout ---
    
-    # Right Column: Advice
-    advice_cell = content_table.cell(0, 1)
-    advice_cell.vertical_alignment = WD_ALIGN_VERTICAL.TOP
-    advice_cell.width = Cm(12)
-    advice_cell.add_paragraph('Advice')
-    
-    # Add advice from your patient advice records
-    if patient.advice:
-        for advice in patient.advice:
-            #advice_cell.paragraphs[0].add_run(f"Advice on {advice.timestamp.strftime('%Y-%m-%d')}:\n").bold = True
-            if advice.prescribed_drugs:
-                for drug in advice.prescribed_drugs:
-                    advice_cell.add_paragraph(f"{drug.name} " ,style='List Bullet')
-    else:
-        advice_cell.paragraphs[0].add_run("No advice recorded.")   
-    doc.add_paragraph().add_run().add_break()   
-    #doc.add_paragraph().add_run().add_break()   
-    # --- Doctor's Signature ---
-    signature_path = os.path.join(current_app.root_path, 'static', 'signature.png')
-     # 3. Check if the signature file exists before adding it
-    if os.path.exists(signature_path):
-        # Add the picture to the document
-        # Set a reasonable width (e.g., 1.5 inches or 3.8 cm) to avoid distortion
-        doc.add_picture(signature_path, width=Inches(1))
-        image_para= doc.paragraphs[-1]
-        image_para.alignment= WD_ALIGN_PARAGRAPH.LEFT
-        image_para.paragraph_format.space_after= Pt(0)
-        image_para.paragraph_format.line_spacing = 1
-           
-    else:
-        # Placeholder line if signature is missing, also with minimal spacing
-        placeholder_para = doc.add_paragraph('_________________________')
-        placeholder_para.alignment = WD_ALIGN_PARAGRAPH.RIGHT
-        placeholder_para.paragraph_format.space_after = Pt(0)
-    # 3. Add the doctor's name beneath the signature/line
-    doctor_brac = f"({doctor_data['name']})"
-    p_name = doc.add_paragraph(doctor_brac)
-    today=datetime.now().strftime('%d-%m-%Y')
-    p_date=doc.add_paragraph(today)
-    p_date.alignment=WD_ALIGN_PARAGRAPH.LEFT
-    p_date.paragraph_format.space_before=Pt(0)
-    p_date.paragraph_format.line_spacing =1
+    main_table = document.add_table(rows=1, cols=2)
+    main_table.autofit = False
+    for row in main_table.rows:
+       row.cells[0].width = Inches(2.5) 
+       row.cells[1].width=Inches(7.5) # left column (Vitals + Complaints)
+       #row.cells[3].width = Inches(7.5)  # right column (Advice)
+    #main_table.columns[0].width =Inches(1.5)
+    #main_table.columns[1].width =Inches(4.5)
+    left_col = main_table.rows[0].cells[0]
+    #shading = main_table.cell(0,1)._tc.get_or_add_tcPr().get_or_add_shd()
+    #shading.set(qn('w:fill'), "D3D3D3")   # light gray fill
+    right_col = main_table.rows[0].cells[1]
 
-    # Set space before the paragraph containing the name to zero (0 points)
-    p_name.paragraph_format.space_before = Pt(0)
-    p_name.paragraph_format.line_spacing = 1
-    
-     # Save the document to a buffer instead of a file
-    doc_io = io.BytesIO()
-    doc.save(doc_io)
-    doc_io.seek(0)    
-    # Send the file to the user for download
-    filename = f'{patient.name} Advice.docx'
-    return send_file(doc_io, as_attachment=True, download_name=filename, mimetype='application/vnd.openxmlformats-officedocument.wordprocessingml.document')
+    # Left: Patient Vitals + Chief complaints
+    vitals_text = f"Vitals & complaints:\nBP: \nPulse: 'N/A'\nTemp: "
+    complaints_text = f"\nChief Complaints:\n{ 'N/A'}"
+    left_col.text = vitals_text + complaints_text
+
+    # Right: Advice + Prescribed Drugs
+    advice_text = ""
+    for advice in patient.advice:
+        advice_text += f"Advice:\n"
+        if advice.prescribed_drugs:
+            for drug in advice.prescribed_drugs:
+                advice_text += f" - {drug.name}\n"
+        advice_text += "\n"
+    right_col.text = advice_text.strip()
+
+    set_table_borders(main_table,  color="FFFFFF", size="2")  # faint border
+    main_table.autofit=False
+    # --- Save to BytesIO for Flask response ---
+    file_stream = io.BytesIO()
+    filename = f"{patient.name}_advice.docx"
+    document.save(file_stream)
+    file_stream.seek(0)
+
+    return send_file(
+        file_stream,
+        as_attachment=True,
+        download_name=filename,
+        mimetype="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    )
 
 # ---------------------------
 # Run and creates all tables if they don’t exist
