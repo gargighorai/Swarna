@@ -89,13 +89,9 @@
       <td>{{ patient.mob_no }}</td>
       <td>{{patient.address}}</td>
       <td>
-        
+         <a href="{{ url_for('give_advice', patient_id=patient.id) }}"class="btn btn-sm btn-success">Give Advice</a>
        <a href="{{ url_for('create_patient_doc', patient_id=patient.id) }}" 
-                onclick="showDownloadMessage()" 
-                 class="btn btn-primary">
-                 Download Report (.docx)
-               </a> 
-               <a href="{{ url_for('give_advice', patient_id=patient.id) }}"class="btn btn-sm btn-info">Give Advice</a>
+                 class="btn btn-primary">Download </a>      
        <a href="{{ url_for('patient_profile', patient_id=patient.id) }}"class="btn btn-sm btn-info">View Advice</a>
        <a href="{{ url_for('advice_history', patient_id=patient.id) }}" class="btn btn-sm btn-info">History</a>
         <a href="{{ url_for('delete_patient',patient_id=patient.id) }}" class="btn btm-sm btn-danger">Delete</a>

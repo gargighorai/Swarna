@@ -5,10 +5,11 @@
 <style>
     .patient-info{
         color: rgb(7, 52, 70);
+        background-color: azure;
         font-size: 14px;
         font-weight: normal;
         width: 90%;
-        border: 1px solid rgb(228, 154, 69);
+        border: 1px solid rgb(236, 221, 204);
         vertical-align:middle;
         height: 22px;
         margin-left: 30px;
@@ -21,7 +22,7 @@
         padding-right: 10px;
         margin: 0px;
     }
-    .patient-card,.advice-card{
+    .patient-card{
         border: 1px solid #eef1f1;
          padding: 2px; 
          margin-bottom: 2px;
@@ -30,14 +31,36 @@
 .doctor-left, .doctor-info{
     color: #072270;
 }
-
-.advice-card{
-    position :relative;
-    width: 70%;
+.delete-btn{
+    background-color: red;
+    width: 80px;
+    border: none;
+    background-color: red !important;
+    color: #fff !important;
+    margin-bottom: 3px;
+}
+.downloadBtn{
+    background-color: blue;
+    width: 80px;
+    padding: 3px;
+    background-color:blue !important; /* same as normal */
+    color: #fff !important; 
+    /* position: relative; */
+}
+ .body-container{
+    width: 570px;
+    padding-top: 0;
+    margin-top: 10px;
+    background-color: whitesmoke;
     margin-left: auto;
     margin-right: auto;
-}
+ }
+ .no-hover:hover {
+  background-color: inherit !important;
+  color: inherit !important;
+ }
 </style>
+
 <div class="container-fluid  mt-0  ">
     <div class="header d-flex justify-content-between me-0">
       
@@ -56,39 +79,38 @@
 </div>
 <div class="patient-info"><small>
     <p> Name: {{ patient.name }} Age: {{patient.age}} yrs
-     Gender:{{ patient.gender}} {{patient.address}}:
+     Gender: {{ patient.gender}} {{patient.address}}:
     {{patient.bp}}</p></small></div>
-    
-    {% if patient.advice %}
-        {% for advice in patient.advice %}
-            <div>
-            <div class="advice-card">
-              <div> <p><strong><u>Advice</u></strong></p>
-           <div class="d-flex"><ul>
+  <div class="body-container ">
+    <div class="row">
+       <div class="col-md-9 p-3">
+         {% if patient.advice %}
+            {% for advice in patient.advice %}       
+               <p><strong><u>Advice</u></strong></p>
+               <ul>
                     {% for drug in advice.prescribed_drugs %}
-                        <li>{{ drug.name }}</li>
-                   
+                        <li style="list-style: disc;">{{ drug.name }}</li>                
                     {% endfor %}
                 </ul></p>
-              </div>
-              </div>
-            
-              <div class=" d-flex align-content-end flex-end">
-               
-                  <form action="{{ url_for('delete_advice', advice_id=advice.id) }}" method="post" style="display:text-end;">
-                   <button type="submit" class="btn btn-sm text-end delete-btn  bg-danger text-white" title="Delete Advice">&times;</button>
+       </div>         
+  <div class="mt-auto col-md-3 p-3">
+    <form action="{{ url_for('delete_advice', advice_id=advice.id) }}" method="post">
+                   <button type="submit" class="btn btn-sm w-auto delete-btn text-white no-hover" title="Delete Advice">Delete</button>
                  </form>
-            <a href="{{ url_for('create_patient_doc', patient_id=patient.id) }}" 
-                 onclick="showDownloadMessage()" 
-                 class="btn btn-primary p-0"> Download
-           </a>  
-        </div>   
-        </div>
+                 <a href="{{ url_for('create_patient_doc', patient_id=patient.id) }}" 
+                   class="btn btn-sm downloadBtn text-white w-auto">Download</a>  
+              </div>   
             </div>
+  </div>
+  
         {% endfor %}
     {% else %}
         <p>No advice has been given to this patient yet.</p>
     {% endif %}
+  
+  </div>
+</div>
+    
     <script>
    
      </script>

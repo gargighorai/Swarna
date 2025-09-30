@@ -218,7 +218,21 @@ def import_json_to_db(filepath):
 def manage_drugs():
     drugs = Drug.query.order_by(Drug.name).all()
     return render_template("admin_drugs.html", drugs=drugs)
-@app.route("/add_drugs")
+
+@app.route('/admin/drugs/add', methods=["POST"])
+@login_required
+def add_drug():
+    name = request.form.get("name", "").strip()
+    if name:
+        if not Drug.query.filter_by(name=name).first():
+            db.session.add(Drug(name=name))
+            db.session.commit()
+            flash("Drug added successfully.", "success")
+        else:
+            flash("Drug already exists.", "warning")
+    else:
+        flash("Invalid drug name.", "danger")
+    return redirect(url_for("manage_drugs"))
 @app.route('/admin/drugs/delete/<int:drug_id>', methods=["POST"])
 @login_required
 def delete_drug(drug_id):
@@ -258,9 +272,7 @@ def export_drugs():
 # ---------------------------
 @app.route("/")
 def home():
-    if current_user.is_authenticated:
-        return redirect(url_for("dashboard"))
-    return redirect(url_for("login"))
+     return redirect(url_for('register'))
 
 @app.route('/')
 def index():
@@ -378,14 +390,12 @@ def print_advice(advice_id):
 
 @app.route('/delete_advice/<int:advice_id>', methods=['POST'])
 def delete_advice(advice_id):
-    advice_to_delete = Advice.query.get_or_404(advice_id)
-    
-    patient_id = advice_to_delete.patient_id
-    
+    advice_to_delete = Advice.query.get_or_404(advice_id)   
+    patient_id = advice_to_delete.patient_id    
     # Delete the advice from the database
     db.session.delete(advice_to_delete)
-    db.session.commit()
-    
+    db.session.commit() 
+
     flash("Advice deleted successfully!", "success")
     return redirect(url_for('patient_profile', patient_id=patient_id))
 @app.route("/delete_patient/<int:patient_id>",methods=["GET","POST"])
@@ -505,9 +515,7 @@ def data_entry_form():
     now=date.today()
     available_drugs = Drug.query.all()
     return render_template('patient_form.html', patient_id=1001, available_drugs=available_drugs,today=now)
-
 # New Route to export as  Docx file --
-
 from flask import send_file
 from docx import Document
 from docx.shared import Pt
@@ -515,6 +523,7 @@ from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 import io
 from datetime import datetime
+from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
 @app.route('/create_patient_doc/<int:patient_id>')
 def create_patient_doc(patient_id):
     patient = Patient.query.get_or_404(patient_id)
@@ -546,7 +555,7 @@ def create_patient_doc(patient_id):
     right = row.cells[1]
     doctor=current_user
     left.text = f"{doctor.username}\n{doctor.degree}\n{doctor.reg_no}"
-    right.text = f"Mob:{doctor.doc_mob}\n{doctor.website}\nEmail us:{doctor.email}\nDate:{datetime.now().strftime('%d-%m-%Y')}"
+    right.text = f"Mob:{doctor.doc_mob}\n{doctor.website}\nEmail:{doctor.email}\nDate:{datetime.now().strftime('%d-%m-%Y')}"
     set_table_borders(header_table,  color="FFFFFF", size="2")  # invisible borders
     header_table.autofit=False
     header_table.columns[0].width = Inches(5)   # left column wider
@@ -562,29 +571,22 @@ def create_patient_doc(patient_id):
         f"Address:{patient.address}  "
     )
     set_table_borders(pat_table, color="D3D3D3", size="2")  # faint border
-
     document.add_paragraph()  # spacing
-
-    # --- Two Column Layout ---
-   
+    # --- Two Column Layout ---  
     main_table = document.add_table(rows=1, cols=2)
     main_table.autofit = False
     for row in main_table.rows:
        row.cells[0].width = Inches(2.5) 
-       row.cells[1].width=Inches(7.5) # left column (Vitals + Complaints)
-       #row.cells[3].width = Inches(7.5)  # right column (Advice)
-    #main_table.columns[0].width =Inches(1.5)
-    #main_table.columns[1].width =Inches(4.5)
+       row.cells[1].width=Inches(7.5) # left column (Vitals + Complaints)     
     left_col = main_table.rows[0].cells[0]
-    #shading = main_table.cell(0,1)._tc.get_or_add_tcPr().get_or_add_shd()
-    #shading.set(qn('w:fill'), "D3D3D3")   # light gray fill
     right_col = main_table.rows[0].cells[1]
-
     # Left: Patient Vitals + Chief complaints
-    vitals_text = f"Vitals & complaints:\nBP: \nPulse: 'N/A'\nTemp: "
-    complaints_text = f"\nChief Complaints:\n{ 'N/A'}"
-    left_col.text = vitals_text + complaints_text
-
+    left_col.text =(
+        "Vitals:\n"
+        "BP:   " "Wt: Kg\n"
+        "Pulse: /min \n" "Temp: °C\n"
+        "C/O-    "
+    )
     # Right: Advice + Prescribed Drugs
     advice_text = ""
     for advice in patient.advice:
@@ -597,9 +599,23 @@ def create_patient_doc(patient_id):
 
     set_table_borders(main_table,  color="FFFFFF", size="2")  # faint border
     main_table.autofit=False
+    document.add_paragraph
+ # Add signature line (aligned right)
+    signature_path= os.path.join("static","signature.png")
+    sig_para = document.add_paragraph()
+    sig_para.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
+    if os.path.exists(signature_path):
+        run =sig_para.add_run()
+        run.add_picture(signature_path,width=Inches(1),height=Cm(1.7))
+        date_para = document.add_paragraph(f"Date: {datetime.now().strftime('%d-%m-%Y')}")
+        date_para.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
+        sig_para.add_run(f"\n{doctor.username}")
+    else:
+        sig_para.add_run("Doctor's Signature: _______________________\n")
+        sig_para.add_run(f"Dr. {doctor.username}")
     # --- Save to BytesIO for Flask response ---
     file_stream = io.BytesIO()
-    filename = f"{patient.name}_advice.docx"
+    filename = f"{patient.name} advice.docx"
     document.save(file_stream)
     file_stream.seek(0)
 

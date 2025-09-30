@@ -106,19 +106,17 @@
       <i class="bi bi-arrow-left-circle me-1"></i> Back to Dashboard
     </a>  
   </div>
-  <form method="POST" action="{{ url_for('add_drugs') }}" class="row g-3 mb-2">
+  <form method="POST" action="{{ url_for('admin_drugs') }}" class="row g-3 mb-2">
     
       <div class="d-flex justify-content-end align-items-center ms-auto gap-2">
         <input type="text" name="name" id="drugInput"
                  class="form-control" placeholder="Add drugs name" required>
        <button type="submit" class="addDrug"> Add Drug</button>
       <a href="{{ url_for('import_static_drugs') }}" class="servDrug">
-  Import from server 
-</a>
-
+                     Import from server 
+              </a>
       </div>
   </form>
-
   {% if drugs %}
   <table class="table table-primary  table-striped">
   <thead style="background-color: #b87b20ff;">
