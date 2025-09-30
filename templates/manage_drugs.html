@@ -1,32 +1,22 @@
-<h3>Add New Drug</h3>
-<form method="POST" action="{{ url_for('add_drug') }}">
-    <div class="mb-3">
-        <label for="drug_name" class="form-label">Drug Name</label>
-        <input type="text" class="form-control" id="drug_name" name="drug_name" required>
-    </div>
-    <div class="mb-3">
-        <label for="drug_form" class="form-label">Form</label>
-        <input type="text" class="form-control" id="drug_form" name="drug_form" required>
-    </div>
-    <div class="mb-3">
-        <label for="drug_strength" class="form-label">Strength</label>
-        <input type="text" class="form-control" id="drug_strength" name="drug_strength" required>
-    </div>
-    <div class="mb-3">
-        <label for="drug_quantity" class="form-label">Quantity</label>
-        <input type="number" class="form-control" id="drug_quantity" name="drug_quantity" required>
-    </div>
-    <div class="mb-3">
-        <label for="drug_instructions" class="form-label">Instructions</label>
-        <textarea class="form-control" id="drug_instructions" name="drug_instructions" rows="3"></textarea>
-    </div>
-    <div class="mb-3">
-        <label for="drug_type" class="form-label">Type</label>
-        <input type="text" class="form-control" id="drug_type" name="drug_type" required>
-    </div>
-    <div class="mb-3 form-check">
-        <input type="checkbox" class="form-check-input" id="stock_available" name="stock_available" value="True" checked>
-        <label class="form-check-label" for="stock_available">In Stock</label>
-    </div>
-    <button type="submit" class="btn btn-primary">Add Drug</button>
-</form>
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+  <h2>Manage Drugs</h2>
+
+  <!-- Add new drug -->
+  <form method="POST" action="{{ url_for('manage_drugs') }}" class="mb-3 d-flex">
+    <input type="text" name="drug_name" class="form-control me-2" placeholder="Enter drug name" required>
+    <button type="submit" class="btn btn-primary">Add</button>
+  </form>
+
+  <!-- List existing drugs -->
+  <ul class="list-group">
+    {% for drug in drugs %}
+      <li class="list-group-item d-flex justify-content-between align-items-center">
+        {{ drug.name }}
+        <a href="{{ url_for('delete_drug', drug_id=drug.id) }}" class="btn btn-sm btn-danger">Delete</a>
+      </li>
+    {% endfor %}
+  </ul>
+</div>
+{% endblock %}

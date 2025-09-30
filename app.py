@@ -213,11 +213,20 @@ def import_json_to_db(filepath):
         
     return imported_count
 
-@app.route('/admin/drugs')
+@app.route('/manage_drugs', methods=['GET', 'POST'])
 @login_required
 def manage_drugs():
-    drugs = Drug.query.order_by(Drug.name).all()
-    return render_template("admin_drugs.html", drugs=drugs)
+    if request.method == 'POST':
+        drug_name = request.form.get('drug_name')
+        if drug_name:
+            new_drug = Drug(name=drug_name)
+            db.session.add(new_drug)
+            db.session.commit()
+            flash("Drug added successfully!", "success")
+        return redirect(url_for('manage_drugs'))
+
+    drugs = Drug.query.all()
+    return render_template('manage_drugs.html', drugs=drugs)
 
 @app.route('/admin/drugs/add', methods=["POST"])
 @login_required
@@ -233,7 +242,7 @@ def add_drug():
     else:
         flash("Invalid drug name.", "danger")
     return redirect(url_for("manage_drugs"))
-@app.route('/admin/drugs/delete/<int:drug_id>', methods=["POST"])
+@app.route('/delete_drug/<int:drug_id>', methods=['POST', 'GET'])
 @login_required
 def delete_drug(drug_id):
     drug = Drug.query.get_or_404(drug_id)
@@ -241,6 +250,7 @@ def delete_drug(drug_id):
     db.session.commit()
     flash("Drug deleted", "danger")
     return redirect(url_for("manage_drugs"))
+
 @app.route('/admin/drugs/edit/<int:drug_id>', methods=["POST"])
 @login_required
 def edit_drug(drug_id):
@@ -268,7 +278,7 @@ def export_drugs():
     response.headers.set("Content-Disposition", "attachment", filename="drugs.json")
     return response
 # ---------------------------
-# Routes for user authentication 
+# Routes for user registration Editing authentication 
 # ---------------------------
 @app.route("/")
 def home():
@@ -323,6 +333,36 @@ def register():
         flash('Registration successful! You can now log in.', 'success')
         return redirect(url_for('login'))
     return render_template('register.html')
+@app.route('/edit_doctor/<int:doctor_id>', methods=['GET', 'POST'])
+@login_required
+def edit_doctor(doctor_id):
+    doctor = User.query.get_or_404(doctor_id)
+
+    # Only allow editing your own profile (if needed)
+    if doctor.id != current_user.id:
+        flash("You can only edit your own profile.", "danger")
+        return redirect(url_for('dashboard'))
+
+    if request.method == 'POST':
+        doctor.name = request.form['name']
+        doctor.degree = request.form['degree']
+        doctor.reg_no = request.form['reg_no']
+        doctor.email = request.form['email']
+
+        # optional: update signature file
+        if 'signature' in request.files:
+            file = request.files['signature']
+            if file.filename != "":
+                filename = secure_filename(file.filename)
+                filepath = os.path.join('static/', filename)
+                file.save(filepath)
+                doctor.signature = filepath
+
+        db.session.commit()
+        flash("Doctor profile updated successfully!", "success")
+        return redirect(url_for('dashboard'))
+
+    return render_template('edit_doctor.html', doctor=doctor)
     
 @app.route("/login", methods=["GET", "POST"])
 def login():
