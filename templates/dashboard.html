@@ -53,7 +53,7 @@
   </div>   
   </header>
   
-<div>
+<!-- <div>
 {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
       {% for category, message in messages %}
@@ -63,7 +63,7 @@
       {% endfor %}
     {% endif %}
   {% endwith %}
-</div>
+</div> -->
 
     <div>
      <a href="{{ url_for('add_patient') }}"
@@ -74,11 +74,11 @@
 <table class="table table-bordered bg-white">
   <thead class="table-light fw-normal">
     <tr style="font-size:12px ; font-weight:normal">
-      <th>Name</th>
-      <th>Age</th>
-      <th>Gender</th>
-      <th>Mobile</th><th>Address</th>
-      <th>Actions</th>
+      <th scope="col">Name</th>
+      <th scope="col">Age</th>
+      <th scope="col">Gender</th>
+      <th scope="col">Mobile</th><th>Address</th>
+      <th scope="col" style="width:240px;" class="text-center">Actions</th>
     </tr>
   </thead>
   <tbody>
