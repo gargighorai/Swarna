@@ -337,18 +337,15 @@ def register():
 @login_required
 def edit_doctor(doctor_id):
     doctor = User.query.get_or_404(doctor_id)
-
     # Only allow editing your own profile (if needed)
     if doctor.id != current_user.id:
         flash("You can only edit your own profile.", "danger")
         return redirect(url_for('dashboard'))
-
     if request.method == 'POST':
         doctor.name = request.form['name']
         doctor.degree = request.form['degree']
         doctor.reg_no = request.form['reg_no']
         doctor.email = request.form['email']
-
         # optional: update signature file
         if 'signature' in request.files:
             file = request.files['signature']
@@ -357,11 +354,9 @@ def edit_doctor(doctor_id):
                 filepath = os.path.join('static/', filename)
                 file.save(filepath)
                 doctor.signature = filepath
-
         db.session.commit()
-        flash("Doctor profile updated successfully!", "success")
+        # flash("Doctor profile updated successfully!", "success")
         return redirect(url_for('dashboard'))
-
     return render_template('edit_doctor.html', doctor=doctor)
     
 @app.route("/login", methods=["GET", "POST"])

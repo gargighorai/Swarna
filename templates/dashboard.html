@@ -6,10 +6,11 @@
   height:70px;
   width:97vw;
   padding-left: 10px;
-  background-color: beige;
-  border: 1px solid darkkhaki;
+  background-color: rgb(245, 245, 241);
+  border: 1px solid rgb(247, 246, 244);
   border-radius: 10px;
   margin: 0px;
+  color: rgb(13, 51, 73);
 }
 .info{
   display: flex-end;
@@ -31,16 +32,16 @@
   margin: 25px;
   float: right;
   margin-top: 5px;
-  margin-right: 12px;
+  margin-right: 20px;
   margin-bottom: 6px;
 }
 </style>
 <header>
   
-<div class="header container-fluid  mt-0  mx-2 ">
+<div class="header container-fluid  mt-0  mx-1 ">
     <div class=" d-flex  justify-content-between">
       <div class="col-md-6  text-start">
-      <p class="mb-0">{{current_user.username}}<br>    
+      <p class="mb-0 fs-6 text-primary">{{current_user.username}}<br>    
          <p style="font-size:12px" class="mb-0"> {{current_user.degree}}</p>
       <small><p class="mb-0" style="font-size: 10px;">{{ current_user.reg_no}} </p></small>
      </div>
