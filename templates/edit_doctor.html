@@ -1,33 +1,47 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="container mt-4">
-    <h2>Edit Profile</h2>
-    <form method="POST" enctype="multipart/form-data">
-        <div class="mb-3">
-            <label class="form-label">Name</label>
-            <input type="text" name="name" value="{{ current_user.username }}" class="form-control" required>
+
+<div class="container mt-0">
+  <div class="card shadow-lg">
+    <div class="card-header bg-primary text-white text-center">
+      <h6>Edit Profile</h6>
+    </div>
+    <div class="card-body">
+      <form method="POST" action="{{ url_for('edit_profile') }}">
+        <table class="table table-borderless align-middle">
+          <tbody>
+            <tr>
+              <td style="width: 30%;"><label class="form-label ">Username</label></td>
+              <td><input type="text" class="form-control" name="username" value="{{ doctor.username }}" required></td>
+            </tr>
+            <tr>
+              <td><label class="form-label">Email</label></td>
+              <td><input type="email" class="form-control" name="email" value="{{ doctor.email }}" required></td>
+            </tr>
+            <tr>
+              <td><label class="form-label ">Degree</label></td>
+              <td><input type="text" class="form-control" name="degree" value="{{ doctor.degree }}"></td>
+            </tr>
+            <tr>
+              <td><label class="form-label ">Reg. No</label></td>
+              <td><input type="text" class="form-control" name="reg_no" value="{{ doctor.reg_no }}"></td>
+            </tr>
+            <tr>
+              <td><label class="form-label fw-bold">Hospital</label></td>
+              <td><input type="text" class="form-control" name="hospital" value="{{ doctor.hospital }}"></td>
+            </tr>
+            <tr>
+              <td><label class="form-label fw-bold">New Password</label></td>
+              <td><input type="password" class="form-control" name="password" placeholder="Leave blank to keep old one"></td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="d-grid mt-3">
+          <button type="submit" class="btn btn-success">Save Changes</button>
         </div>
-        <div class="mb-3">
-            <label class="form-label">Degree</label>
-            <input type="text" name="degree" value="{{ doctor.degree }}" class="form-control">
-        </div>
-        <div class="mb-3">
-            <label class="form-label">Registration No</label>
-            <input type="text" name="reg_no" value="{{ doctor.reg_no }}" class="form-control">
-        </div>
-        <div class="mb-3">
-            <label class="form-label">Email</label>
-            <input type="email" name="email" value="{{ doctor.email }}" class="form-control">
-        </div>
-        <div class="mb-3">
-            <label class="form-label">Signature</label>
-            {% if doctor.signature %}
-                <p>Current: <img src="{{ url_for('static', filename=doctor.signature.split('')[-1]) }}" 
-                                  width="120" /></p>
-            {% endif %}
-            <input type="file" name="signature" class="form-control">
-        </div>
-        <button type="submit" class="btn btn-success">Save Changes</button>
-    </form>
+      </form>
+    </div>
+  </div>
 </div>
+
 {% endblock %}

@@ -6,7 +6,6 @@ from datetime import date
 from io import BytesIO
 from datetime import datetime
 # Third-party imports
-import docx
 from docx.oxml.ns import qn
 from docx.oxml import OxmlElement
 from flask import Flask, jsonify, render_template, request, redirect, send_file, url_for, flash,Blueprint
@@ -333,32 +332,27 @@ def register():
         flash('Registration successful! You can now log in.', 'success')
         return redirect(url_for('login'))
     return render_template('register.html')
-@app.route('/edit_doctor/<int:doctor_id>', methods=['GET', 'POST'])
+
+@app.route('/edit_profile', methods=['GET', 'POST'])
 @login_required
-def edit_doctor(doctor_id):
-    doctor = User.query.get_or_404(doctor_id)
-    # Only allow editing your own profile (if needed)
-    if doctor.id != current_user.id:
-        flash("You can only edit your own profile.", "danger")
-        return redirect(url_for('dashboard'))
+def edit_profile():
+    doctor = current_user     
     if request.method == 'POST':
-        doctor.name = request.form['name']
+        doctor.username = request.form['username']
+        doctor.email = request.form['email']
         doctor.degree = request.form['degree']
         doctor.reg_no = request.form['reg_no']
-        doctor.email = request.form['email']
-        # optional: update signature file
-        if 'signature' in request.files:
-            file = request.files['signature']
-            if file.filename != "":
-                filename = secure_filename(file.filename)
-                filepath = os.path.join('static/', filename)
-                file.save(filepath)
-                doctor.signature = filepath
+        doctor.hospital = request.form['hospital']
+
+        if request.form['password']:  # only update if new password entered
+            doctor.set_password(request.form['password'])
+
         db.session.commit()
-        # flash("Doctor profile updated successfully!", "success")
+        flash('Profile updated successfully!', 'success')
         return redirect(url_for('dashboard'))
+
     return render_template('edit_doctor.html', doctor=doctor)
-    
+
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":

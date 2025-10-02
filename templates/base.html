@@ -85,7 +85,7 @@
             <ul class="navbar-nav d-flex align-items-center ms-auto">
                 {% if current_user.is_authenticated %}
                 <li class="nav-item">
-                    <a class="btn btn-sm btn-light me-2 p-1" href="{{ url_for('edit_doctor', doctor_id=current_user.id) }}">Edit Profile</a>
+                    <a class="btn btn-sm btn-light me-2 p-1" href="{{ url_for('edit_profile', doctor_id=current_user.id) }}">Edit Profile</a>
                 </li>
                 <li class="nav-item"><a class="btn btn-sm btn-light me-2 p-1" href="{{ url_for('dashboard') }}"  class="btn btn-sm btn-primary p-1">Dashboard</a>
                     </li>

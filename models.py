@@ -10,13 +10,13 @@ advice_drugs_association = db.Table(
 
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(20), unique=True, nullable=False)
+    username = db.Column(db.String(80), unique=False, nullable=False)
     password_hash = db.Column(db.String(255), nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=True)
     doc_mob = db.Column(db.String(20), unique=True, nullable=True)
     degree = db.Column(db.String(100), nullable=True)
     website = db.Column(db.String(100), nullable=True)
-    reg_no = db.Column(db.String(50), unique=True, nullable=True)
+    reg_no = db.Column(db.String(70), unique=True, nullable=True)
     
     patients = db.relationship('Patient', backref='owner', lazy='dynamic')
     def __repr__(self):
