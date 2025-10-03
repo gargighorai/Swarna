@@ -25,22 +25,7 @@
     background-color: #255d8b;
     border-radius: 0.2rem;
   }
-  th{
-    text-align: center;
-    font-size: 9px;
-    padding: 0;
-    margin: 0;
-    line-height: 1;
-    vertical-align: top;
-  }
-  td{ 
-    font-size: 12px;
-    vertical-align: top;
-    padding : 0;
-    margin: 0;
-    line-height: 0.5;
-   }
-   .action-columns {
+  .action-columns {
     text-align: center;
     width: 100px;
    }
@@ -96,7 +81,11 @@
     color: white;
     background-color: #13334e;
     border-radius: 0.3rem;
-}   
+} 
+.drugs{
+  color: red;
+
+}  
   </style>
 
 <div class="container-fluid mt-0 mb-0">
@@ -126,17 +115,15 @@
     </tr>
   </thead>
   <tbody>
-    {% for drug in drugs %}
+    {% for drugs in drugs %}
     <tr>
       <!-- <td>{{ loop.index }}</td> -->
       <td  style=" border-left: 1px solid #cc9e39ff;">{{ drug.name }}</td>
-      <td style="text-align:center; border-left: 1px solid #cc9e39ff;">
-        <!-- Edit button triggers modal -->
-        <button class="btn btn-sm btn-warning no-space-button" data-bs-toggle="modal" data-bs-target="#editModal{{ drug.id }}">Edit</button>
-
-        <!-- Delete button -->
+      
+<td class="drugs text-center">
+        <a href="{{url_for('edit_drug',drug_id=drug.id)}}" class=" btn-sm btn-warning no-space-button" data-bs-toggle="modal" data-bs-target="#editModal{{ drug.id }}">Edit</a>
         <a href="{{ url_for('delete_drug', drug_id=drug.id) }}" class="btn btn-sm btn-danger no-space-button">Delete</a>
-
+       </td>
         <!-- Edit Modal -->
         <div class="modal fade" id="editModal{{ drug.id }}" tabindex="-1">
           <div class="modal-dialog">

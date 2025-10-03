@@ -227,11 +227,14 @@ def manage_drugs():
     drugs = Drug.query.all()
     return render_template('manage_drugs.html', drugs=drugs)
 
-@app.route('/admin/drugs/add', methods=["POST"])
+@app.route('/admin/drugs/', methods=['GET',"POST"])
 @login_required
 def add_drug():
-    name = request.form.get("name", "").strip()
-    if name:
+    if request.method=='POST':
+        name = request.form.get("name")
+        new_drug =Drug(name=name)
+        db.session.add(new_drug)
+        db.session.commit()
         if not Drug.query.filter_by(name=name).first():
             db.session.add(Drug(name=name))
             db.session.commit()
@@ -250,7 +253,7 @@ def delete_drug(drug_id):
     flash("Drug deleted", "danger")
     return redirect(url_for("manage_drugs"))
 
-@app.route('/admin/drugs/edit/<int:drug_id>', methods=["POST"])
+@app.route('/admin/drugs/edit/<int:drug_id>', methods=['GET',"POST"])
 @login_required
 def edit_drug(drug_id):
     drug = Drug.query.get_or_404(drug_id)

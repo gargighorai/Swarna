@@ -5,12 +5,12 @@
 <style>
     .patient-info{
         color: rgb(7, 52, 70);
-        background-color: azure;
+        background-color: rgb(238, 237, 235); 
         font-size: 14px;
         font-weight: normal;
-        width: 90%;
+        width: 91%;
         border: 1px solid rgb(236, 221, 204);
-        vertical-align:middle;
+        /* vertical-align:middle; */
         height: 22px;
         margin-left: 30px;
     }
@@ -70,26 +70,26 @@
            <small><p class="mb-0" style="font-size: 10px;">{{ current_user.reg_no}} </p></small>
        </div>
         <div class="doctor-info col-md-6 text-end" style="font-size:12px">
-           <p> {{ current_user.website}}<br>
-           <small> Email: {{ current_user.email}} <br>
-           Mob: {{ current_user.doc_mob}}<br></small>
+           <p> Web:<u><b>{{ current_user.website}}</b></u><br>
+           <small> Email:<b> {{ current_user.email}}</b> <br>
+           Mob: <b>{{ current_user.doc_mob}}</b><br></small>
            Date: <b>{{ today.strftime('%d-%m-%Y')}}</b></P>
         </div>
   </div>
 </div>
-<div class="patient-info"><small>
-    <p> Name: {{ patient.name }} Age: {{patient.age}} yrs
-     Gender: {{ patient.gender}} {{patient.address}}:
-    {{patient.bp}}</p></small></div>
+<div class="patient-info text-primary"><small>
+    <p> Patient Name: <b>{{ patient.name }} </b>  | Age: <b>{{patient.age}} yrs </b>|
+     Gender: <b>{{ patient.gender}}</b> | <b>{{patient.address}} </b>
+    </p></small></div>
   <div class="body-container ">
-    <div class="row">
-       <div class="col-md-9 p-3">
+    <div class="d-flex">
+       <div class="col-md-9 ">
          {% if patient.advice %}
             {% for advice in patient.advice %}       
                <p><strong><u>Advice</u></strong></p>
                <ul>
                     {% for drug in advice.prescribed_drugs %}
-                        <li style="list-style: disc;">{{ drug.name }}</li>                
+                        <li style="list-style: disc;color:blue; font-size:14px">{{ drug.name }}</li>                
                     {% endfor %}
                 </ul></p>
        </div>         
